@@ -1,0 +1,22 @@
+﻿@page
+@model MoneyMap.Web.Pages.IndexModel
+
+<h1>Hello from codehaks.com!</h1>
+@if (Model.IsNewYear)
+{
+
+    <h2>
+        @Model.DaysLeft Days Left to 2025
+
+        @if (Model.DaysLeft < 11)
+        {
+            <span style="color:red">Hurry up!</span>
+        }
+
+        <a asp-page="about">Contact Us</a>
+    </h2>
+}
+
+
+
+

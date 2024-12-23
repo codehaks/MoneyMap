@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35605.110
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoneyMap.Web", "src\MoneyMap.Web\MoneyMap.Web.csproj", "{9697805E-D60A-4824-BE6C-7596AA1603AD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoneyMap", "src\MoneyMap\MoneyMap.csproj", "{D45B12C5-0659-4E31-AC78-A938737684DC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9697805E-D60A-4824-BE6C-7596AA1603AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9697805E-D60A-4824-BE6C-7596AA1603AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9697805E-D60A-4824-BE6C-7596AA1603AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9697805E-D60A-4824-BE6C-7596AA1603AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D45B12C5-0659-4E31-AC78-A938737684DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D45B12C5-0659-4E31-AC78-A938737684DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D45B12C5-0659-4E31-AC78-A938737684DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D45B12C5-0659-4E31-AC78-A938737684DC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AE28E792-C333-4868-BF55-DCA6D6C394C2}
+	EndGlobalSection
+EndGlobal
