@@ -1,6 +1,15 @@
+using Microsoft.EntityFrameworkCore;
 using MoneyMap.Application;
+using MoneyMap.Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<MoneyMapDbContext>(options =>
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
+
 
 builder.Services.AddRazorPages();
 
