@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MoneyMap.Core.DataModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,12 +13,8 @@ public class MoneyMapDbContext : DbContext
     {
     }
 
+    public DbSet<Expense> Expenses { get; set; }
+
     public DbSet<ExpenseCategory> ExpenseCategories { get; set; }
 
-}
-
-public class ExpenseCategory
-{
-    public int Id { get; set; }
-    public string Name { get; set; } = default!;
 }
