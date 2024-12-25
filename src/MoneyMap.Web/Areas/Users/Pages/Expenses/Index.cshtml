@@ -1,4 +1,30 @@
 ﻿@page
 @model MoneyMap.Web.Areas.Users.Pages.Expenses.IndexModel
-@{
-}
+
+<a asp-page="./Create" class="btn btn-primary">Create New</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Category</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var expense in Model.ExpenseList)
+        {
+            <tr>
+                <td>-</td>
+                <td>@expense.Amount</td>
+                <td>@expense.Date</td>
+                <td>
+                    <a asp-page="./Edit" asp-route-id="@expense.Id">Edit</a> |
+                    <a asp-page="./Delete" asp-route-id="@expense.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
