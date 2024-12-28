@@ -15,7 +15,7 @@ builder.Services.AddDbContext<MoneyMapDbContext>(options =>
 builder.Services.AddRazorPages();
 
 builder.Services.AddTransient<IExpenseService, ExpenseService>();
-builder.Services.AddTransient<ICalendarService,CalendarService>();
+builder.Services.AddTransient<ICalendarService, CalendarService>();
 
 var app = builder.Build();
 

@@ -18,6 +18,7 @@ public class IndexModel : PageModel
 
     public void OnGet()
     {
+
         ExpenseList = _expenseService.GetAll();
     }
 }
