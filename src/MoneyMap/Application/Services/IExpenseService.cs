@@ -5,4 +5,6 @@ public interface IExpenseService
 {
     IList<Expense> GetAll();
     void Create(Expense expense);
+    Expense? FindById(int id);
+    void Update(Expense expense);
 }

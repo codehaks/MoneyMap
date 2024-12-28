@@ -22,8 +22,28 @@ public class ExpenseService : IExpenseService
         _db.SaveChanges();
     }
 
+    public Expense? FindById(int id)
+    {
+        var expense = _db.Expenses.Find(id);
+        return expense;
+    }
+
     public IList<Expense> GetAll()
     {
         return _db.Expenses.ToList();
+    }
+
+    public void Update(Expense expense)
+    {
+        var oldExpense = _db.Expenses.Find(expense.Id);
+
+        if (oldExpense != null) { 
+        
+            oldExpense.Amount= expense.Amount;
+            oldExpense.Note= expense.Note;
+            oldExpense.Date= expense.Date;
+        }
+
+        _db.SaveChanges();
     }
 }
