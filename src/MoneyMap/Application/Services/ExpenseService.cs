@@ -16,6 +16,12 @@ public class ExpenseService : IExpenseService
         _db = db;
     }
 
+    public void Create(Expense expense)
+    {
+        _db.Add(expense);
+        _db.SaveChanges();
+    }
+
     public IList<Expense> GetAll()
     {
         return _db.Expenses.ToList();
