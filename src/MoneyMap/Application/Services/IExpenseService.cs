@@ -7,4 +7,5 @@ public interface IExpenseService
     void Create(Expense expense);
     Expense? FindById(int id);
     void Update(Expense expense);
+    void Remove(int id);
 }

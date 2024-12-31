@@ -33,6 +33,16 @@ public class ExpenseService : IExpenseService
         return _db.Expenses.ToList();
     }
 
+    public void Remove(int id)
+    {
+        var expense = _db.Expenses.Find(id);
+        if (expense!=null)
+        {
+            _db.Expenses.Remove(expense);
+            _db.SaveChanges();
+        }
+    }
+
     public void Update(Expense expense)
     {
         var oldExpense = _db.Expenses.Find(expense.Id);

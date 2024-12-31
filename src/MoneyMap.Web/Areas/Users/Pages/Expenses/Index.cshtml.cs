@@ -21,4 +21,14 @@ public class IndexModel : PageModel
 
         ExpenseList = _expenseService.GetAll();
     }
+
+    [BindProperty]
+    public int Id { get; set; }
+
+    public IActionResult OnPostDelete()
+    {
+        _expenseService.Remove(Id);
+        // ExpenseList = _expenseService.GetAll();
+        return RedirectToPage();
+    }
 }

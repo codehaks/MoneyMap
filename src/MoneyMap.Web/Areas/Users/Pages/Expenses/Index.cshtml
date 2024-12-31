@@ -20,8 +20,12 @@
                 <td>@expense.Amount</td>
                 <td>@expense.Date</td>
                 <td>
-                    <a asp-page="./Edit" asp-route-id="@expense.Id">Edit</a> |
-                    <a asp-page="./Delete" asp-route-id="@expense.Id">Delete</a>
+                    <a asp-page="./Edit" asp-route-id="@expense.Id" class="btn btn-info">Edit</a> 
+
+                    <form method="post" asp-page-handler="delete">
+                        <input hidden name="id" value="@expense.Id"/>
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
                 </td>
             </tr>
         }
