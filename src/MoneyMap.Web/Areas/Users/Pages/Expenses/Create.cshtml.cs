@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using MoneyMap.Application.Services;
@@ -15,6 +16,7 @@ public class CreateModel : PageModel
         _expenseService = expenseService;
     }
 
+    [BindNever]
     public SelectList CategorySelectList { get; set; }
 
     public int CategoryId { get; set; }
@@ -23,7 +25,7 @@ public class CreateModel : PageModel
     [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than 0")]
     public decimal Amount { get; set; } // cents
 
-    public DateTime Date { get; set; }=DateTime.UtcNow;
+    public DateTime Date { get; set; } = DateTime.UtcNow;
 
     [Required]
     [StringLength(100)]
@@ -32,7 +34,7 @@ public class CreateModel : PageModel
 
     public void OnGet()
     {
-        var categories= _expenseService.GetCategories();
+        var categories = _expenseService.GetCategories();
         CategorySelectList = new SelectList(categories, "Id", "Name");
     }
 
@@ -44,10 +46,10 @@ public class CreateModel : PageModel
             ModelState.AddModelError("Date", "Too old!");
 
             ModelState.AddModelError("", "Can not add new expense!");
-            
+
             return Page();
         }
-        else if (Date.Date>DateTime.UtcNow.Date)
+        else if (Date.Date > DateTime.UtcNow.Date)
         {
             ModelState.AddModelError("Date", "Can not be in future!");
 
@@ -62,6 +64,7 @@ public class CreateModel : PageModel
 
         _expenseService.Create(new MoneyMap.Core.DataModels.Expense
         {
+            CategoryId = CategoryId,
             Amount = Amount,
             Date = Date.ToUniversalTime(), //DateTime.UtcNow,
             Note = Note
