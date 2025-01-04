@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using MoneyMap.Application.Services;
 using System.ComponentModel.DataAnnotations;
 
@@ -13,6 +15,11 @@ public class EditModel : PageModel
     {
         _expenseService = expenseService;
     }
+
+    [BindNever]
+    public SelectList CategorySelectList { get; set; }
+
+    public int CategoryId { get; set; }
 
     public int Id { get; set; }
 
@@ -29,6 +36,9 @@ public class EditModel : PageModel
 
     public IActionResult OnGet(int id)
     {
+        var categories = _expenseService.GetCategories();
+        CategorySelectList = new SelectList(categories, "Id", "Name");
+
         var expense = _expenseService.FindById(id);
 
         if (expense == null)
@@ -36,15 +46,11 @@ public class EditModel : PageModel
             return NotFound();
         }
 
-        //AutoMapper
-        //Mapster
-        //Custom Mapper
-
         Id = expense.Id;
+        CategoryId = expense.CategoryId;
         Amount = expense.Amount;
         Date = expense.Date;
         Note = expense.Note;
-
 
         return Page();
     }
@@ -75,7 +81,7 @@ public class EditModel : PageModel
 
         _expenseService.Update(new MoneyMap.Core.DataModels.Expense
         {
-            Id= Id,
+            Id = Id,
             Amount = Amount,
             Date = Date.ToUniversalTime(), //DateTime.UtcNow,
             Note = Note
