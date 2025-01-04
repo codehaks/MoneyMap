@@ -16,7 +16,7 @@
         @foreach (var expense in Model.ExpenseList)
         {
             <tr>
-                <td>-</td>
+                <td>@expense.Category.Name</td>
                 <td>@expense.Amount</td>
                 <td>@expense.Date</td>
                 <td>

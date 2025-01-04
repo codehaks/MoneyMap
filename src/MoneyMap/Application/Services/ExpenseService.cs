@@ -1,4 +1,5 @@
-﻿using MoneyMap.Core.DataModels;
+﻿using Microsoft.EntityFrameworkCore;
+using MoneyMap.Core.DataModels;
 using MoneyMap.Infrastructure.Data;
 
 namespace MoneyMap.Application.Services;
@@ -25,7 +26,7 @@ public class ExpenseService : IExpenseService
 
     public IList<Expense> GetAll()
     {
-        return _db.Expenses.ToList();
+        return _db.Expenses.Include("Category").ToList();
     }
 
     public void Remove(int id)
