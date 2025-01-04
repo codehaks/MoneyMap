@@ -12,4 +12,13 @@ public class MoneyMapDbContext : DbContext
 
     public DbSet<ExpenseCategory> ExpenseCategories { get; set; }
 
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        //modelBuilder.Entity<Expense>()
+        //    .HasOne(e => e.Category)
+        //    .WithMany(c => c.Expenses)
+        //    .HasForeignKey(e => e.CategoryId);
+        base.OnModelCreating(modelBuilder);
+    }
+
 }
