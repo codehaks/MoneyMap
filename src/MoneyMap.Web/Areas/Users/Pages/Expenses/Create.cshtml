@@ -14,6 +14,15 @@
             <div asp-validation-summary="None" class="text-danger"></div>
 
             <div class="mb-3">
+                <label asp-for="CategoryId" class="form-label">Select Category</label>
+                <select asp-for="CategoryId" class="form-select" asp-items="@Model.CategorySelectList" >
+                    
+                </select>
+                <span asp-validation-for="CategoryId" class="text-danger"></span>
+            </div>
+
+
+            <div class="mb-3">
                 <label asp-for="Amount" class="form-label"></label>
                 <input asp-for="Amount" class="form-control">
                 <span asp-validation-for="Amount" class="text-danger"></span>
@@ -37,7 +46,7 @@
     </div>
 </div>
 
-@section scripts{
+@section scripts {
     <partial name="_ValidationScriptsPartial" />
 
 }

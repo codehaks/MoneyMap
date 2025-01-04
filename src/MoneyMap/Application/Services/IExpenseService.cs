@@ -8,4 +8,5 @@ public interface IExpenseService
     Expense? FindById(int id);
     void Update(Expense expense);
     void Remove(int id);
+    List<ExpenseCategory> GetCategories();
 }

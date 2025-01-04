@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using MoneyMap.Application.Services;
 using System.ComponentModel.DataAnnotations;
 
@@ -14,6 +15,10 @@ public class CreateModel : PageModel
         _expenseService = expenseService;
     }
 
+    public SelectList CategorySelectList { get; set; }
+
+    public int CategoryId { get; set; }
+
     [Required]
     [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than 0")]
     public decimal Amount { get; set; } // cents
@@ -24,6 +29,12 @@ public class CreateModel : PageModel
     [StringLength(100)]
     [MinLength(1)]
     public string Note { get; set; } = default!;
+
+    public void OnGet()
+    {
+        var categories= _expenseService.GetCategories();
+        CategorySelectList = new SelectList(categories, "Id", "Name");
+    }
 
     public IActionResult OnPost()
     {

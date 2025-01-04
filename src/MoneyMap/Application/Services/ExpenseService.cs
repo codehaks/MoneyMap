@@ -52,4 +52,9 @@ public class ExpenseService : IExpenseService
 
         _db.SaveChanges();
     }
+
+    public List<ExpenseCategory> GetCategories()
+    {
+        return _db.ExpenseCategories.ToList();
+    }
 }
