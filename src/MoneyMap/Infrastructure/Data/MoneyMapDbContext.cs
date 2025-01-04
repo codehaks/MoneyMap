@@ -14,10 +14,17 @@ public class MoneyMapDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        //modelBuilder.Entity<Expense>()
-        //    .HasOne(e => e.Category)
-        //    .WithMany(c => c.Expenses)
-        //    .HasForeignKey(e => e.CategoryId);
+        modelBuilder.Entity<ExpenseCategory>().HasData(
+            new ExpenseCategory { Id = 1, Name = "Groceries" },
+            new ExpenseCategory { Id = 2, Name = "Rent" },
+            new ExpenseCategory { Id = 3, Name = "Utilities" },
+            new ExpenseCategory { Id = 4, Name = "Transportation" },
+            new ExpenseCategory { Id = 5, Name = "Entertainment" },
+            new ExpenseCategory { Id = 6, Name = "Health" },
+            new ExpenseCategory { Id = 7, Name = "Insurance" },
+            new ExpenseCategory { Id = 8, Name = "Other" }
+        );
+
         base.OnModelCreating(modelBuilder);
     }
 
