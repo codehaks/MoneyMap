@@ -1,10 +1,5 @@
 ﻿using MoneyMap.Core.DataModels;
 using MoneyMap.Infrastructure.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MoneyMap.Application.Services;
 public class ExpenseService : IExpenseService
@@ -36,7 +31,7 @@ public class ExpenseService : IExpenseService
     public void Remove(int id)
     {
         var expense = _db.Expenses.Find(id);
-        if (expense!=null)
+        if (expense != null)
         {
             _db.Expenses.Remove(expense);
             _db.SaveChanges();
@@ -47,11 +42,12 @@ public class ExpenseService : IExpenseService
     {
         var oldExpense = _db.Expenses.Find(expense.Id);
 
-        if (oldExpense != null) { 
-        
-            oldExpense.Amount= expense.Amount;
-            oldExpense.Note= expense.Note;
-            oldExpense.Date= expense.Date;
+        if (oldExpense != null)
+        {
+
+            oldExpense.Amount = expense.Amount;
+            oldExpense.Note = expense.Note;
+            oldExpense.Date = expense.Date;
         }
 
         _db.SaveChanges();
