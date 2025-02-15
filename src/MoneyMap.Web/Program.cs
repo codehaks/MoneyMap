@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MoneyMap.Application;
 using MoneyMap.Application.Services;
 using MoneyMap.Infrastructure.Data;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
