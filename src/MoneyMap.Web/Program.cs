@@ -4,6 +4,7 @@ using MoneyMap.Application;
 using MoneyMap.Application.Services;
 using MoneyMap.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +24,10 @@ builder.Services.AddDefaultIdentity<ApplicationUser>
 
     }).AddEntityFrameworkStores<MoneyMapDbContext>();
 
-builder.Services.AddRazorPages();
+builder.Services.AddRazorPages().AddRazorPagesOptions(options =>
+{
+    options.Conventions.AuthorizeAreaFolder("users", "/");
+});
 
 builder.Services.AddTransient<IExpenseService, ExpenseService>();
 builder.Services.AddTransient<ICalendarService, CalendarService>();
