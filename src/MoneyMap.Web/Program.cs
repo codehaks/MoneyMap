@@ -14,8 +14,14 @@ builder.Services.AddDbContext<MoneyMapDbContext>(options =>
 
 // Add Identity
 builder.Services.AddDefaultIdentity<ApplicationUser>
-    (options => options.SignIn.RequireConfirmedAccount = false)
-    .AddEntityFrameworkStores<MoneyMapDbContext>();
+    (options =>
+    {
+        options.SignIn.RequireConfirmedAccount = false;
+        options.User.RequireUniqueEmail = true;
+        options.Lockout.MaxFailedAccessAttempts = 3;
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
+
+    }).AddEntityFrameworkStores<MoneyMapDbContext>();
 
 builder.Services.AddRazorPages();
 
