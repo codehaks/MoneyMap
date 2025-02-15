@@ -1,8 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using MoneyMap.Core.DataModels;
 
 namespace MoneyMap.Infrastructure.Data;
-public class MoneyMapDbContext : DbContext
+public class MoneyMapDbContext : IdentityDbContext<ApplicationUser>
 {
     public MoneyMapDbContext(DbContextOptions<MoneyMapDbContext> options) : base(options)
     {
@@ -28,4 +30,10 @@ public class MoneyMapDbContext : DbContext
         base.OnModelCreating(modelBuilder);
     }
 
+}
+
+public class ApplicationUser:IdentityUser
+{
+    //public string FirstName { get; set; }
+    //public string LastName { get; set; }
 }
