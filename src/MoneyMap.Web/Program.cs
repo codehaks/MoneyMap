@@ -14,7 +14,7 @@ builder.Services.AddDbContext<MoneyMapDbContext>(options =>
 });
 
 // Add Identity
-builder.Services.AddDefaultIdentity<ApplicationUser>
+builder.Services.AddIdentity<ApplicationUser,IdentityRole>
     (options =>
     {
         options.SignIn.RequireConfirmedAccount = false;
@@ -22,11 +22,23 @@ builder.Services.AddDefaultIdentity<ApplicationUser>
         options.Lockout.MaxFailedAccessAttempts = 3;
         options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
 
-    }).AddEntityFrameworkStores<MoneyMapDbContext>();
+    })
+    .AddDefaultUI()
+    .AddEntityFrameworkStores<MoneyMapDbContext>();
+
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireAdminRole", policy =>
+    {
+        policy.RequireRole("admin");
+    });
+});
 
 builder.Services.AddRazorPages().AddRazorPagesOptions(options =>
 {
     options.Conventions.AuthorizeAreaFolder("users", "/");
+    options.Conventions.AuthorizeAreaFolder("admin", "/", "RequireAdminRole");
 });
 
 builder.Services.AddTransient<IExpenseService, ExpenseService>();
