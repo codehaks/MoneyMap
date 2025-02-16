@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using MoneyMap.Application.Services;
+using MoneyMap.Application;
 
 namespace MoneyMap.Web.Areas.Admin.Pages.Users
 {

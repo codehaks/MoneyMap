@@ -1,6 +1,6 @@
 ﻿using MoneyMap.Infrastructure.Data;
 
-namespace MoneyMap.Application.Services;
+namespace MoneyMap.Application;
 public interface IUserService
 {
     List<ApplicationUser> GetAll();
