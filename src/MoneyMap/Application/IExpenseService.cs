@@ -1,6 +1,6 @@
 ﻿using MoneyMap.Core.DataModels;
 
-namespace MoneyMap.Application.Services;
+namespace MoneyMap.Application;
 public interface IExpenseService
 {
     IList<Expense> GetAll();

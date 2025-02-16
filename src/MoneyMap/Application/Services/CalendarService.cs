@@ -1,4 +1,4 @@
-﻿namespace MoneyMap.Application;
+﻿namespace MoneyMap.Application.Services;
 public class CalendarService : ICalendarService
 {
     public int DaysLeftInYear()

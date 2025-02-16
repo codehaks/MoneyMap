@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using MoneyMap.Application.Services;
+using MoneyMap.Application;
 using System.ComponentModel.DataAnnotations;
 
 namespace MoneyMap.Web.Areas.Users.Pages.Expenses;
