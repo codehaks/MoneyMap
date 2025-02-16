@@ -1,0 +1,23 @@
+﻿@page
+@model MoneyMap.Web.Areas.Admin.Pages.Users.DetailsModel
+@{
+}
+
+<h2>User Details</h2>
+<hr />
+
+<h3>Roles</h3>
+
+@if (Model.Roles.Any())
+{
+    <ul>
+        @foreach (var role in Model.Roles)
+        {
+            <li>@role</li>
+        }
+    </ul>
+}
+else
+{
+    <span>No Roles</span>
+}

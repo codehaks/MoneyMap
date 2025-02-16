@@ -20,6 +20,9 @@
                 <td>@user.UserName</td>
                 <td>@user.Email</td>
                 <td>@(user.EmailConfirmed ? "Yes" : "No")</td>
+                <td>
+                    <a asp-page="./details" asp-route-id="@user.Id" class="btn btn-info">Details</a>
+                </td>
             </tr>
         }
     </tbody>
