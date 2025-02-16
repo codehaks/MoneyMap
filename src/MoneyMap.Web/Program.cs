@@ -43,6 +43,7 @@ builder.Services.AddRazorPages().AddRazorPagesOptions(options =>
 
 builder.Services.AddTransient<IExpenseService, ExpenseService>();
 builder.Services.AddTransient<ICalendarService, CalendarService>();
+builder.Services.AddTransient<IUserService, UserService>();
 
 var app = builder.Build();
 

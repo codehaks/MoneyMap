@@ -2,3 +2,25 @@
 @model MoneyMap.Web.Areas.Admin.Pages.Users.IndexModel
 @{
 }
+
+<h2>Users List</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Email Confirmed</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model.Users)
+        {
+            <tr>
+                <td>@user.UserName</td>
+                <td>@user.Email</td>
+                <td>@(user.EmailConfirmed ? "Yes" : "No")</td>
+            </tr>
+        }
+    </tbody>
+</table>
