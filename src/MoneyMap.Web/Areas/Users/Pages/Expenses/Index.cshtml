@@ -18,15 +18,16 @@
             <tr>
                 <td>@expense.Category.Name</td>
                 <td>@expense.Amount</td>
-                <td>@expense.Date</td>
-                <td>
-                    <a asp-page="./Edit" asp-route-id="@expense.Id" class="btn btn-info">Edit</a> 
-
-                    <form method="post" asp-page-handler="delete">
-                        <input hidden name="id" value="@expense.Id"/>
+                <td>@expense.Date.ToShortDateString()</td>
+                <td>@expense.Note</td>
+                <td class="d-flex gap-2">
+                    <a asp-page="./Edit" asp-route-id="@expense.Id" class="btn btn-info">Edit</a>
+                    <form method="post" asp-page-handler="delete" class="d-inline">
+                        <input type="hidden" name="id" value="@expense.Id" />
                         <button type="submit" class="btn btn-danger">Delete</button>
                     </form>
                 </td>
+
             </tr>
         }
     </tbody>
