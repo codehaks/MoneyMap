@@ -3,7 +3,7 @@
 namespace MoneyMap.Application;
 public interface IExpenseService
 {
-    IList<Expense> GetAll();
+    IList<Expense> GetAll(string searchTerm);
     void Create(Expense expense);
     Expense? FindById(int id);
     void Update(Expense expense);

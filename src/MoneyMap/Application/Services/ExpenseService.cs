@@ -24,9 +24,17 @@ public class ExpenseService : IExpenseService
         return expense;
     }
 
-    public IList<Expense> GetAll()
+    public IList<Expense> GetAll(string searchTerm)
     {
-        return _db.Expenses.Include("Category").ToList();
+        var query = _db.Expenses.Include("Category");
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            query = query
+               // .Where(e => e.Note.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+               .Where(e => EF.Functions.Like(e.Note.ToLower(), $"%{searchTerm.ToLower()}%"));
+
+        }
+        return query.ToList();
     }
 
     public void Remove(int id)

@@ -23,15 +23,7 @@ public class IndexModel : PageModel
 
     public void OnGet()
     {
-        var expenses = _expenseService.GetAll();
-
-        if (!string.IsNullOrEmpty(SearchTerm))
-        {
-            expenses = expenses
-                .Where(e => e.Note.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-        }
-
+        var expenses = _expenseService.GetAll(SearchTerm);
         ExpenseList = expenses;
     }
 
