@@ -18,10 +18,21 @@ public class IndexModel : PageModel
 
     public IList<Expense> ExpenseList { get; set; }
 
+    [BindProperty(SupportsGet = true)]
+    public string? SearchTerm { get; set; }
+
     public void OnGet()
     {
+        var expenses = _expenseService.GetAll();
 
-        ExpenseList = _expenseService.GetAll();
+        if (!string.IsNullOrEmpty(SearchTerm))
+        {
+            expenses = expenses
+                .Where(e => e.Note.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        ExpenseList = expenses;
     }
 
     [BindProperty]

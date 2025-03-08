@@ -3,12 +3,20 @@
 
 <a asp-page="./Create" class="btn btn-primary">Create New</a>
 
+<form method="get">
+    <div class="input-group mb-3">
+        <input type="text" name="SearchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Search notes..." />
+        <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+</form>
+
 <table class="table">
     <thead>
         <tr>
             <th>Category</th>
             <th>Amount</th>
             <th>Date</th>
+            <th>Note</th>
             <th>Actions</th>
         </tr>
     </thead>
