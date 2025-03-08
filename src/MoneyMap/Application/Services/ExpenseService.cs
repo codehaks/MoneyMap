@@ -24,7 +24,7 @@ public class ExpenseService : IExpenseService
         return expense;
     }
 
-    public IList<Expense> GetAll(string searchTerm)
+    public IList<Expense> GetAll(string? searchTerm, int? categoryId)
     {
         var query = _db.Expenses.Include("Category");
         if (!string.IsNullOrEmpty(searchTerm))
@@ -33,6 +33,12 @@ public class ExpenseService : IExpenseService
                // .Where(e => e.Note.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
                .Where(e => EF.Functions.Like(e.Note.ToLower(), $"%{searchTerm.ToLower()}%"));
 
+        }
+
+        if (categoryId is not null)
+        {
+            query = query
+                .Where(e => e.CategoryId==categoryId);
         }
         return query.ToList();
     }

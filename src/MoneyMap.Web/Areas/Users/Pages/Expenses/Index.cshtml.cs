@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using MoneyMap.Application;
 using MoneyMap.Core.DataModels;
 
@@ -21,9 +23,18 @@ public class IndexModel : PageModel
     [BindProperty(SupportsGet = true)]
     public string? SearchTerm { get; set; }
 
+    [BindNever]
+    public SelectList CategorySelectList { get; set; }
+
+    [BindProperty(SupportsGet = true)]
+    public int? CategoryId { get; set; }
+
     public void OnGet()
     {
-        var expenses = _expenseService.GetAll(SearchTerm);
+        var categories = _expenseService.GetCategories();
+        CategorySelectList = new SelectList(categories, "Id", "Name");
+
+        var expenses = _expenseService.GetAll(SearchTerm,CategoryId);
         ExpenseList = expenses;
     }
 

@@ -4,6 +4,14 @@
 <a asp-page="./Create" class="btn btn-primary">Create New</a>
 
 <form method="get">
+    <div class="mb-3">
+        <label asp-for="CategoryId" class="form-label">Select Category</label>
+        <select asp-for="CategoryId" class="form-select" asp-items="@Model.CategorySelectList">
+            <option value="">Select Category</option>
+        </select>
+        <span asp-validation-for="CategoryId" class="text-danger"></span>
+    </div>
+
     <div class="input-group mb-3">
         <input type="text" name="SearchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Search notes..." />
         <button type="submit" class="btn btn-primary">Search</button>
