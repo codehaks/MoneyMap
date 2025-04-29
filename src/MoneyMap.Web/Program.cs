@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using MoneyMap.Application;
 using MoneyMap.Application.Services;
+using MoneyMap.Core.DataModels;
 using MoneyMap.Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -42,9 +43,21 @@ builder.Services.AddRazorPages().AddRazorPagesOptions(options =>
     options.Conventions.AuthorizeAreaFolder("admin", "/", "RequireAdminRole");
 });
 
-builder.Services.AddTransient<IExpenseService, ExpenseService>();
-builder.Services.AddTransient<ICalendarService, CalendarService>();
-builder.Services.AddTransient<IUserService, UserService>();
+//builder.Services.AddTransient<IExpenseService, ExpenseService>();
+//builder.Services.AddTransient<ICalendarService, CalendarService>();
+//builder.Services.AddTransient<IUserService, UserService>();
+
+builder.Services.Scan(scan => scan
+    .FromAssemblyOf<Expense>()
+    .AddClasses(c => c.Where(type => type.Name.EndsWith("Service")))
+    .AsImplementedInterfaces()
+    .WithTransientLifetime()
+);
+
+builder.Services.AddScoped<ICalendarService, CalendarService>();
+
+builder.Services.Decorate<IUserService, LoggingUserServiceDecorator>();
+
 
 builder.WebHost.UseStaticWebAssets();
 

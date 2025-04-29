@@ -24,6 +24,7 @@ public class UserService : IUserService
 
     public async Task<IList<string>> GetRoles(string userId)
     {
+
         var user = await _userManager.FindByIdAsync(userId);
         return await _userManager.GetRolesAsync(user);
     }
