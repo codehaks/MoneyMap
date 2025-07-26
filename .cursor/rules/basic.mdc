@@ -8,13 +8,13 @@ alwaysApply: false
 rules:
   - Fork the repository and use feature branches for new work.
   - Write clear, descriptive commit messages.
+  - Always Inject ILogger to constructor if not already added
+  - Add only logs with debug level with ILogger dependency injection
   - Run all tests with 'dotnet test' before submitting a pull request.
   - Add new data models in 'MoneyMap.Core/DataModels/'.
   - Add new services in 'MoneyMap.Application/Services/'.
   - Create Razor Pages in the appropriate Areas.
   - Update the database with new migrations as needed.
-  - Use environment variables for sensitive configuration (e.g., connection strings).
-  - Follow password and security requirements as described in the README.
   - Use .NET 9.0 SDK and PostgreSQL as the standard stack.
   - Follow the project structure and organization as outlined in the README.
 description:
