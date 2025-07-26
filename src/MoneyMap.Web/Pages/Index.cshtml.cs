@@ -15,12 +15,10 @@ namespace MoneyMap.Web.Pages
 
         public int DaysLeft { get; set; }
         public bool IsNewYear { get; set; }
-        public void OnGet()
+        public async Task OnGetAsync()
         {
-        
-            IsNewYear = _calendarService.IsNewYear();
-            DaysLeft = _calendarService.DaysLeftInYear();
-
+            IsNewYear = await _calendarService.IsNewYearAsync();
+            DaysLeft = await _calendarService.DaysLeftInYearAsync();
         }
     }
 }

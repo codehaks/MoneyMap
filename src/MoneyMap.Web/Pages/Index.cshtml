@@ -1,22 +1,109 @@
 ﻿@page
 @model MoneyMap.Web.Pages.IndexModel
 
-<h1>Welcome!</h1>
-<h2>Hello from codehaks.com!</h2>
+<div class="hero-section text-center py-5">
+    <div class="container">
+        <h1 class="display-4 fw-bold text-primary mb-4">Welcome to MoneyMap</h1>
+        <p class="lead mb-4">Take control of your finances with our simple and powerful expense tracking application</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a asp-area="Users" asp-page="/Expenses/Index" class="btn btn-primary btn-lg">Start Tracking</a>
+            <a asp-page="/About" class="btn btn-outline-secondary btn-lg">Learn More</a>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-chart-line text-primary" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <h5 class="card-title">Track Expenses</h5>
+                    <p class="card-text">Easily record and categorize your daily expenses to understand your spending patterns.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-chart-pie text-success" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <h5 class="card-title">Visual Insights</h5>
+                    <p class="card-text">Get clear visual representations of your spending habits with intuitive charts and reports.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-shield-alt text-info" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <h5 class="card-title">Secure & Private</h5>
+                    <p class="card-text">Your financial data is protected with secure authentication and private storage.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @if (Model.IsNewYear)
 {
-
-    <h2>
-        @Model.DaysLeft Days Left to 2025
-
-        @if (Model.DaysLeft < 11)
-        {
-            <span style="color:red">Hurry up!</span>
-        }
-
-        <a asp-page="about">Contact Us</a>
-    </h2>
+    <div class="bg-light py-4">
+        <div class="container text-center">
+            <div class="alert alert-info d-inline-block">
+                <h6 class="mb-2">🎉 New Year Countdown</h6>
+                <p class="mb-0">
+                    <strong>@Model.DaysLeft</strong> days left until 2025
+                    @if (Model.DaysLeft < 11)
+                    {
+                        <span class="text-danger ms-2">⏰ Hurry up!</span>
+                    }
+                </p>
+            </div>
+        </div>
+    </div>
 }
+
+<div class="container py-5">
+    <div class="row align-items-center">
+        <div class="col-lg-6">
+            <h2 class="fw-bold mb-4">Why Choose MoneyMap?</h2>
+            <ul class="list-unstyled">
+                <li class="mb-3">
+                    <i class="fas fa-check text-success me-2"></i>
+                    Simple and intuitive user interface
+                </li>
+                <li class="mb-3">
+                    <i class="fas fa-check text-success me-2"></i>
+                    Powerful expense categorization
+                </li>
+                <li class="mb-3">
+                    <i class="fas fa-check text-success me-2"></i>
+                    Detailed financial reports and analytics
+                </li>
+                <li class="mb-3">
+                    <i class="fas fa-check text-success me-2"></i>
+                    Secure user authentication
+                </li>
+                <li class="mb-3">
+                    <i class="fas fa-check text-success me-2"></i>
+                    Responsive design for all devices
+                </li>
+            </ul>
+            <a asp-area="Users" asp-page="/Expenses/Create" class="btn btn-primary">Get Started Today</a>
+        </div>
+        <div class="col-lg-6 text-center">
+            <div class="bg-primary bg-opacity-10 rounded p-4">
+                <i class="fas fa-mobile-alt text-primary" style="font-size: 4rem;"></i>
+                <p class="mt-3 text-muted">Access your finances anywhere, anytime</p>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 

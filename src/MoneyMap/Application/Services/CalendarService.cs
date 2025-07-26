@@ -11,4 +11,14 @@ public class CalendarService : ICalendarService
     {
         return DateTime.Now.Year < 2025;
     }
+
+    public Task<int> DaysLeftInYearAsync()
+    {
+        return Task.FromResult(DaysLeftInYear());
+    }
+
+    public Task<bool> IsNewYearAsync()
+    {
+        return Task.FromResult(IsNewYear());
+    }
 }

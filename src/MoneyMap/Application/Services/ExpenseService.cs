@@ -1,15 +1,18 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MoneyMap.Core.DataModels;
 using MoneyMap.Infrastructure.Data;
+using Microsoft.Extensions.Logging;
 
 namespace MoneyMap.Application.Services;
 public class ExpenseService : IExpenseService
 {
     private readonly MoneyMapDbContext _db;
+    private readonly ILogger<ExpenseService> _logger;
 
-    public ExpenseService(MoneyMapDbContext db)
+    public ExpenseService(MoneyMapDbContext db, ILogger<ExpenseService> logger)
     {
         _db = db;
+        _logger = logger;
     }
 
     public void Create(Expense expense)
@@ -20,7 +23,16 @@ public class ExpenseService : IExpenseService
 
     public Expense? FindById(int id)
     {
+        _logger.LogDebug("Finding expense by id: {ExpenseId}", id);
         var expense = _db.Expenses.Find(id);
+        if (expense == null)
+        {
+            _logger.LogDebug("Expense with id {ExpenseId} not found.", id);
+        }
+        else
+        {
+            _logger.LogDebug("Expense with id {ExpenseId} found.", id);
+        }
         return expense;
     }
 
