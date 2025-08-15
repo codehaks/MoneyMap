@@ -1,4 +1,9 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@using MoneyMap.Infrastructure.Data
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<!DOCTYPE html>
 <html lang="en" data-bs-theme="auto">
 <head>
     <meta charset="utf-8">
@@ -53,6 +58,35 @@
                 </button>
             </li>
         </ul>
+        
+        @if (SignInManager.IsSignedIn(User))
+        {
+            <div class="navbar-nav ms-auto me-3">
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <svg class="bi me-2" width="16" height="16"><use xlink:href="#door-closed"/></svg>
+                        @UserManager.GetUserName(User)
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li>
+                            <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">
+                                <svg class="bi me-2" width="16" height="16"><use xlink:href="#gear-wide-connected"/></svg>
+                                Account Settings
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Index", new { area = "" })">
+                                <button type="submit" class="dropdown-item">
+                                    <svg class="bi me-2" width="16" height="16"><use xlink:href="#door-closed"/></svg>
+                                    Sign Out
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        }
     </header>
 
     <div class="container-fluid">
@@ -98,10 +132,10 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link d-flex align-items-center gap-2" href="#">
+                                <form class="nav-link d-flex align-items-center gap-2" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Index", new { area = "" })" method="post">
                                     <svg class="bi" aria-hidden="true"><use xlink:href="#door-closed"></use></svg>
-                                    Sign out
-                                </a>
+                                    <button type="submit" class="btn btn-link p-0 m-0 align-baseline" style="text-decoration: none; color: inherit;">Sign out</button>
+                                </form>
                             </li>
                         </ul>
                     </div>
