@@ -1,7 +1,56 @@
 ﻿@{
     Layout = "_Layout";
+    ViewBag.Title = "User Dashboard";
 }
-<h1>User Panel</h1>
-<div>
-    @RenderBody()
+
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-3 mb-4">
+            <div class="sidebar p-4">
+                <h5 class="mb-4 fw-bold text-primary">User Dashboard</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="sidebar-link @(ViewContext.RouteData.Values["page"]?.ToString() == "/Dashboard" ? "active" : "")" 
+                           asp-area="Users" asp-page="/Dashboard">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="sidebar-link @(ViewContext.RouteData.Values["page"]?.ToString() == "/Expenses/Index" ? "active" : "")" 
+                           asp-area="Users" asp-page="/Expenses/Index">
+                            <i class="fas fa-receipt"></i> Expenses
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="sidebar-link @(ViewContext.RouteData.Values["page"]?.ToString() == "/Reports" ? "active" : "")" 
+                           asp-area="Users" asp-page="/Reports">
+                            <i class="fas fa-chart-pie"></i> Reports
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="sidebar-link @(ViewContext.RouteData.Values["page"]?.ToString() == "/Categories" ? "active" : "")" 
+                           asp-area="Users" asp-page="/Categories">
+                            <i class="fas fa-tags"></i> Categories
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="sidebar-link @(ViewContext.RouteData.Values["page"]?.ToString() == "/Settings" ? "active" : "")" 
+                           asp-area="Users" asp-page="/Settings">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            @RenderBody()
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+    @await RenderSectionAsync("Scripts", required: false)
+}

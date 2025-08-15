@@ -1,27 +1,33 @@
-﻿<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+﻿<nav class="navbar navbar-expand-lg navbar-light bg-white py-3 sticky-top">
     <div class="container">
-        <a class="navbar-brand" asp-area="" asp-page="/Index">MoneyMap</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-        aria-expanded="false" aria-label="Toggle navigation">
+        <a class="navbar-brand" asp-area="" asp-page="/Index">
+            <i class="fas fa-map-marker-alt text-primary me-2"></i>MoneyMap
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" 
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-            <ul class="navbar-nav flex-grow-1">
+        <div class="navbar-collapse collapse d-lg-inline-flex justify-content-between">
+            <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
+                    <a class="nav-link px-3" asp-area="" asp-page="/Index">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
+                    <a class="nav-link px-3" asp-area="" asp-page="/About">About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link px-3" asp-area="" asp-page="/Privacy">Privacy</a>
                 </li>
                 @if (User?.Identity?.IsAuthenticated ?? false)
                 {
                     <li class="nav-item">
-                        <a  class="nav-link text-dark" asp-area="users" asp-page="/expenses/index">Expenses</a>
+                        <a class="nav-link px-3" asp-area="users" asp-page="/expenses/index">Expenses</a>
                     </li>
                 }
-
             </ul>
-            <partial name="_LoginPartial" />
+            <div class="d-flex align-items-center">
+                <partial name="_LoginPartial" />
+            </div>
         </div>
     </div>
 </nav>

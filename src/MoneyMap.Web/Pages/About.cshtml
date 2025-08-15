@@ -1,53 +1,300 @@
-﻿@page "/contactus"
+﻿@page "/about"
 @model MoneyMap.Web.Pages.AboutModel
-
 @{
-    Layout = "_LayoutUser";
+    ViewBag.Title = "About Us";
 }
 
-<div class="hero-section text-center py-5">
+<!-- Hero Section -->
+<section class="hero-section text-center text-white" style="padding: 4rem 0;">
     <div class="container">
-        <h1 class="display-4 fw-bold text-primary mb-4">About MoneyMap</h1>
-        <p class="lead mb-4">Your trusted partner in personal finance management</p>
+        <div class="row justify-content-center">
+            <div class="col-lg-8 fade-in">
+                <h1 class="display-4 fw-bold mb-4">About MoneyMap</h1>
+                <p class="lead">Your trusted partner in personal finance management</p>
+            </div>
+        </div>
     </div>
-</div>
+</section>
 
-<div class="container py-5">
-    <div class="row g-5">
-        <div class="col-lg-8">
-            <h2 class="fw-bold mb-4">Our Mission</h2>
-            <p class="lead mb-4">
-                At MoneyMap, we believe that financial freedom starts with understanding your spending habits. 
-                Our mission is to provide you with the tools and insights you need to take control of your finances.
-            </p>
-            
-            <div class="row g-4 mb-5">
-                <div class="col-md-6">
-                    <div class="d-flex align-items-start">
-                        <div class="flex-shrink-0">
+<!-- Mission Section -->
+<section class="py-5 bg-white">
+    <div class="container py-5">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h2 class="fw-bold section-title">Our Mission</h2>
+                <p class="lead mb-4">
+                    At MoneyMap, we believe that financial freedom starts with understanding your spending habits. 
+                    Our mission is to provide you with the tools and insights you need to take control of your finances.
+                </p>
+                <p>
+                    Founded in 2024, MoneyMap has been helping thousands of users track their expenses, 
+                    analyze their spending patterns, and make informed financial decisions.
+                </p>
+            </div>
+            <div class="col-lg-6">
+                <img src="https://placehold.co/600x400/8338ec/ffffff?text=Our+Mission" alt="Our Mission" class="img-fluid rounded-3 shadow">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5 bg-light">
+    <div class="container py-5">
+        <div class="row text-center mb-5">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="fw-bold section-title">Key Features</h2>
+                <p class="lead text-muted">What makes MoneyMap special</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="d-flex">
+                    <div class="flex-shrink-0">
+                        <div class="p-3 rounded-circle bg-white shadow-sm" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
                             <i class="fas fa-bullseye text-primary fs-4"></i>
                         </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h5>Clear Goals</h5>
-                            <p class="text-muted">Set and track your financial goals with our intuitive interface.</p>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h4 class="h5 mb-2">Clear Goals</h4>
+                        <p class="text-muted mb-0">Set and track your financial goals with our intuitive interface.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="d-flex">
+                    <div class="flex-shrink-0">
+                        <div class="p-3 rounded-circle bg-white shadow-sm" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-chart-bar text-primary fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h4 class="h5 mb-2">Smart Analytics</h4>
+                        <p class="text-muted mb-0">Get detailed insights into your spending patterns and trends.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="d-flex">
+                    <div class="flex-shrink-0">
+                        <div class="p-3 rounded-circle bg-white shadow-sm" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-shield-alt text-primary fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h4 class="h5 mb-2">Secure Data</h4>
+                        <p class="text-muted mb-0">Your financial data is securely stored and protected.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="d-flex">
+                    <div class="flex-shrink-0">
+                        <div class="p-3 rounded-circle bg-white shadow-sm" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-mobile-alt text-primary fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h4 class="h5 mb-2">Mobile Friendly</h4>
+                        <p class="text-muted mb-0">Access your finances anywhere, anytime on any device.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="d-flex">
+                    <div class="flex-shrink-0">
+                        <div class="p-3 rounded-circle bg-white shadow-sm" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-tags text-primary fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h4 class="h5 mb-2">Smart Categories</h4>
+                        <p class="text-muted mb-0">Automatically categorize your expenses for better tracking.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="d-flex">
+                    <div class="flex-shrink-0">
+                        <div class="p-3 rounded-circle bg-white shadow-sm" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-sync-alt text-primary fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h4 class="h5 mb-2">Regular Updates</h4>
+                        <p class="text-muted mb-0">We constantly improve our platform with new features.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team Section -->
+<section class="py-5 bg-white">
+    <div class="container py-5">
+        <div class="row text-center mb-5">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="fw-bold section-title">Our Team</h2>
+                <p class="lead text-muted">The people behind MoneyMap</p>
+            </div>
+        </div>
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-4">
+                <div class="card h-100 text-center border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="rounded-circle mx-auto mb-4 bg-light" style="width: 120px; height: 120px; overflow: hidden;">
+                            <img src="https://placehold.co/400x400/3a86ff/ffffff?text=C" class="img-fluid" alt="Team Member">
+                        </div>
+                        <h4 class="card-title mb-1">Codehaks</h4>
+                        <p class="text-muted small mb-3">Founder & Lead Developer</p>
+                        <p class="card-text">Passionate about creating tools that make financial management accessible to everyone.</p>
+                        <div class="d-flex justify-content-center gap-2 mt-3">
+                            <a href="#" class="btn btn-sm btn-outline-primary rounded-circle"><i class="fab fa-github"></i></a>
+                            <a href="#" class="btn btn-sm btn-outline-primary rounded-circle"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#" class="btn btn-sm btn-outline-primary rounded-circle"><i class="fab fa-twitter"></i></a>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="d-flex align-items-start">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-chart-bar text-success fs-4"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section class="py-5 bg-light">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h2 class="fw-bold section-title mb-4">Get In Touch</h2>
+                <p class="lead text-muted mb-5">Have questions or feedback? We'd love to hear from you!</p>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="p-4 bg-white rounded-3 shadow-sm h-100">
+                            <i class="fas fa-envelope text-primary fs-3 mb-3"></i>
+                            <h5>Email Us</h5>
+                            <p class="text-muted mb-0">support@moneymap.com</p>
                         </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h5>Smart Analytics</h5>
-                            <p class="text-muted">Get detailed insights into your spending patterns and trends.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-4 bg-white rounded-3 shadow-sm h-100">
+                            <i class="fas fa-phone text-primary fs-3 mb-3"></i>
+                            <h5>Call Us</h5>
+                            <p class="text-muted mb-0">+1 (555) 123-4567</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-4 bg-white rounded-3 shadow-sm h-100">
+                            <i class="fas fa-map-marker-alt text-primary fs-3 mb-3"></i>
+                            <h5>Visit Us</h5>
+                            <p class="text-muted mb-0">123 Finance St, Money City</p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="d-flex align-items-start">
+            </div>
+        </div>
+    </div>
+</section>
                         <div class="flex-shrink-0">
                             <i class="fas fa-lock text-info fs-4"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5>Secure Data</h5>
+                            <p class="text-muted">Your financial information is protected with enterprise-grade security.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex align-items-start">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-mobile-alt text-warning fs-4"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5>Always Accessible</h5>
+                            <p class="text-muted">Access your finances from any device, anywhere, anytime.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <h2 class="fw-bold mb-4">Our Story</h2>
+            <p class="mb-4">
+                MoneyMap was born from a simple observation: managing personal finances shouldn't be complicated. 
+                We started with a vision to create a tool that would make financial tracking as simple as possible 
+                while providing powerful insights that help users make better financial decisions.
+            </p>
+            <p class="mb-4">
+                Today, MoneyMap serves thousands of users who trust us with their financial data. 
+                We continue to innovate and improve our platform based on user feedback and the latest 
+                financial management best practices.
+            </p>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h4 class="card-title fw-bold mb-4">Get in Touch</h4>
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fas fa-envelope text-primary me-3"></i>
+                            <div>
+                                <strong>Email</strong><br>
+                                <span class="text-muted">support@moneymap.com</span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fas fa-phone text-primary me-3"></i>
+                            <div>
+                                <strong>Phone</strong><br>
+                                <span class="text-muted">+1 (555) 123-4567</span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-map-marker-alt text-primary me-3"></i>
+                            <div>
+                                <strong>Address</strong><br>
+                                <span class="text-muted">123 Finance Street<br>Money City, MC 12345</span>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="mailto:support@moneymap.com" class="btn btn-primary w-100">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="bg-light py-5">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-4 mb-4">
+                <div class="d-flex flex-column align-items-center">
+                    <i class="fas fa-users text-primary mb-3" style="font-size: 3rem;"></i>
+                    <h3 class="fw-bold">1000+</h3>
+                    <p class="text-muted">Active Users</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="d-flex flex-column align-items-center">
+                    <i class="fas fa-chart-line text-success mb-3" style="font-size: 3rem;"></i>
+                    <h3 class="fw-bold">$2M+</h3>
+                    <p class="text-muted">Expenses Tracked</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="d-flex flex-column align-items-center">
+                    <i class="fas fa-star text-warning mb-3" style="font-size: 3rem;"></i>
+                    <h3 class="fw-bold">4.8/5</h3>
+                    <p class="text-muted">User Rating</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<div class="text-center mt-5 text-muted small">
+    Developed by <span class="fw-bold text-danger">codehaks</span> with <span style="color: #e25555;">&#10084;</span>
+</div>
                         </div>
                         <div class="flex-grow-1 ms-3">
                             <h5>Secure Data</h5>

@@ -1,27 +1,43 @@
 ﻿<!DOCTYPE html>
-
-<html lang="en" data-bs-theme="auto">
+<html lang="en" data-bs-theme="light">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@ViewBag.Title - MoneyMap</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="~/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="~/css/custom.css" rel="stylesheet" />
     
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
-    <div class="container-fluid">
+    <header>
         <partial name="_Navbar" />
-    </div>
+    </header>
 
-    <div class="container">
+    <main>
         @RenderBody()
-    </div>
+    </main>
+
+    <footer class="footer mt-auto py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0">&copy; @DateTime.Now.Year - MoneyMap - All rights reserved</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">Developed by <span class="fw-bold text-primary">codehaks</span> with <span style="color: #ff006e;">&#10084;</span></p>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/js/bootstrap.min.js"></script>
+    <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>
