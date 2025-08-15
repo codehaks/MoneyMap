@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="MoneyMap - Personal Finance Management">
     <title>@ViewBag.Title - MoneyMap</title>
-    
+
     <!-- Bootstrap CSS -->
     <link href="~/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
@@ -24,7 +24,7 @@
 
     <header class="navbar sticky-top bg-primary flex-md-nowrap p-0 shadow" data-bs-theme="dark">
         <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="#">MoneyMap</a>
-        
+
         <ul class="navbar-nav flex-row d-md-none">
             <li class="nav-item text-nowrap">
                 <button class="nav-link px-3 text-white" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,7 +32,7 @@
                 </button>
             </li>
         </ul>
-        
+
         @if (SignInManager.IsSignedIn(User))
         {
             <div class="ms-auto me-3 position-relative">
@@ -58,9 +58,6 @@
             </div>
         }
     </header>
-            </div>
-        }
-    </header>
 
     <div class="container-fluid">
         <div class="row">
@@ -73,20 +70,20 @@
                     <div class="offcanvas-body d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto">
                         <ul class="nav flex-column">
                             <li class="nav-item">
-                                <a class="nav-link d-flex align-items-center gap-2 @(ViewContext.RouteData.Values["page"]?.ToString() == "/Index" ? "active" : "")" 
+                                <a class="nav-link d-flex align-items-center gap-2 @(ViewContext.RouteData.Values["page"]?.ToString() == "/Index" ? "active" : "")"
                                    aria-current="page" asp-area="Users" asp-page="/Index">
                                     <i class="fas fa-home"></i>
                                     Dashboard
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link d-flex align-items-center gap-2 @(ViewContext.RouteData.Values["page"]?.ToString()?.Contains("/Expenses") == true ? "active" : "")" 
+                                <a class="nav-link d-flex align-items-center gap-2 @(ViewContext.RouteData.Values["page"]?.ToString()?.Contains("/Expenses") == true ? "active" : "")"
                                    asp-area="Users" asp-page="/Expenses/Index">
                                     <i class="fas fa-credit-card"></i>
                                     Expenses
                                 </a>
                             </li>
-                        
+
                             <li class="nav-item">
                                 <a class="nav-link d-flex align-items-center gap-2" href="#">
                                     <i class="fas fa-chart-line"></i>
@@ -129,7 +126,7 @@
     <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
     <!-- Chart JS (if needed) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.2/dist/chart.umd.js" integrity="sha384-eI7PSr3L1XLISH8JdDII5YN/njoSsxfbrkCTnJrzXt+ENP5MOVBxD+l6sEG4zoLp" crossorigin="anonymous"></script>
-    
+
     <!-- Initialize dropdowns -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -159,7 +156,7 @@
                     }
                 });
             });
-            
+
             // Fix dropdown positioning
             var userDropdown = document.getElementById('userDropdown');
             if (userDropdown) {
@@ -175,7 +172,7 @@
                     }, 0);
                 });
             }
-            
+
             console.log("Dropdowns initialized:", dropdownList.length);
         });
     </script>
