@@ -1,0 +1,92 @@
+/* Identity pages custom styles based on Bootstrap sign-in example */
+html,
+body {
+  height: 100%;
+}
+
+.form-identity {
+  max-width: 430px;
+  padding: 1rem;
+  margin: 0 auto;
+}
+
+.form-identity .form-floating:focus-within {
+  z-index: 2;
+}
+
+.form-identity input[type="email"] {
+  margin-bottom: -1px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.form-identity input[type="password"] {
+  margin-bottom: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* For register page, adjust the ConfirmPassword field */
+.form-identity input.confirm-password {
+  margin-bottom: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.form-identity input.password {
+  margin-bottom: -1px;
+  border-radius: 0;
+}
+
+.identity-page {
+  display: flex;
+  align-items: center;
+  padding-top: 40px;
+  padding-bottom: 40px;
+  background-color: var(--bs-body-bg);
+}
+
+.form-identity .btn-primary {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: #712cf9;
+  --bs-btn-border-color: #712cf9;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #6528e0;
+  --bs-btn-hover-border-color: #6528e0;
+  --bs-btn-focus-shadow-rgb: 49, 132, 253;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #5a23c8;
+  --bs-btn-active-border-color: #5a23c8;
+}
+
+.identity-logo {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 1rem;
+  display: block;
+}
+
+.external-auth {
+  margin-top: 2rem;
+  border-top: 1px solid #dee2e6;
+  padding-top: 1.5rem;
+}
+
+.external-auth .btn {
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.identity-links {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.identity-links a {
+  margin: 0 0.5rem;
+  text-decoration: none;
+}
+
+.identity-links a:hover {
+  text-decoration: underline;
+}
