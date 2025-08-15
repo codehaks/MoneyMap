@@ -85,3 +85,107 @@
   max-width: 800px;
   margin: 0 auto;
 }
+
+/* User dropdown styles */
+.dropdown-menu {
+  min-width: 200px;
+  padding: 0.5rem 0;
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  background-color: white;
+  border-radius: 0.375rem;
+  margin-top: 0.5rem;
+  right: 0;
+  left: auto;
+  z-index: 9999;
+  position: absolute;
+  top: 100%;
+  transform: none !important;
+}
+
+.dropdown-item {
+  padding: 0.6rem 1rem;
+  display: flex;
+  align-items: center;
+  color: #212529;
+  transition: background-color 0.15s ease;
+  white-space: nowrap;
+}
+
+.dropdown-item:hover {
+  background-color: #f8f9fa;
+}
+
+.dropdown-item:active,
+.dropdown-item:focus {
+  background-color: #0d6efd;
+  color: white;
+}
+
+.dropdown-divider {
+  height: 0;
+  margin: 0.5rem 0;
+  border-top: 1px solid #e9ecef;
+}
+
+.dropdown-toggle::after {
+  margin-left: 0.5em;
+  vertical-align: middle;
+}
+
+/* Fix for form inside dropdown item */
+.dropdown-menu form {
+  width: 100%;
+  margin: 0;
+}
+
+/* Fix button inside dropdown */
+.dropdown-menu button.dropdown-item {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+}
+
+/* Ensure icons are aligned properly */
+.dropdown-item svg {
+  margin-right: 0.5rem;
+  min-width: 16px;
+}
+
+/* Ensure the dropdown button is styled properly */
+.nav-link.dropdown-toggle {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+/* Fix header and dropdown positioning */
+.navbar .position-relative {
+  position: static;
+}
+
+.navbar .dropdown {
+  position: static;
+}
+
+.navbar .dropdown .dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: auto;
+  width: auto;
+}
+
+/* Override any Bootstrap transforms that might affect positioning */
+.navbar .dropdown-menu[data-bs-popper] {
+  top: 100%;
+  left: auto;
+  right: 0;
+  transform: none !important;
+  margin-top: 0.5rem;
+  min-width: 240px;
+}

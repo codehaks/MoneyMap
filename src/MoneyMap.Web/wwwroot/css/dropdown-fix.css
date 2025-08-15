@@ -1,0 +1,36 @@
+/* Custom fixes for dropdown menus to ensure they appear on top of content */
+.navbar .dropdown-menu {
+  position: absolute !important;
+  top: 100% !important;
+  right: 1rem !important;
+  left: auto !important;
+  transform: none !important;
+  margin-top: 0.5rem !important;
+  will-change: initial !important;
+}
+
+/* Higher specificity to override Bootstrap's positioning */
+.navbar .dropdown-menu[data-bs-popper],
+.navbar .dropdown-menu.show {
+  position: absolute !important;
+  transform: none !important;
+  top: 100% !important;
+  right: 1rem !important;
+  left: auto !important;
+}
+
+/* Fix for dropdown container position */
+.navbar .dropdown {
+  position: relative !important;
+}
+
+/* Animation for smoother appearance */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.navbar .dropdown-menu.show {
+  animation: fadeIn 0.2s ease forwards;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
