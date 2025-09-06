@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using MoneyMap.Application;
 using MoneyMap.Core.DataModels;
+using System.Security.Claims;
 
 namespace MoneyMap.Web.Areas.Users.Pages.Expenses;
 
@@ -34,7 +35,8 @@ public class IndexModel : PageModel
         var categories = _expenseService.GetCategories();
         CategorySelectList = new SelectList(categories, "Id", "Name");
 
-        var expenses = _expenseService.GetAll(SearchTerm,CategoryId);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var expenses = _expenseService.GetAll(userId, SearchTerm, CategoryId);
         ExpenseList = expenses;
     }
 
@@ -43,7 +45,8 @@ public class IndexModel : PageModel
 
     public IActionResult OnPostDelete()
     {
-        _expenseService.Remove(Id);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        _expenseService.Remove(userId, Id);
         // ExpenseList = _expenseService.GetAll();
         return RedirectToPage();
     }

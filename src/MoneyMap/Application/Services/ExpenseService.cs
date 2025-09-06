@@ -2,54 +2,43 @@
 using MoneyMap.Core.DataModels;
 using MoneyMap.Infrastructure.Data;
 using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Http;
-using System.Security.Claims;
 
 namespace MoneyMap.Application.Services;
 public class ExpenseService : IExpenseService
 {
     private readonly MoneyMapDbContext _db;
     private readonly ILogger<ExpenseService> _logger;
-    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public ExpenseService(MoneyMapDbContext db, ILogger<ExpenseService> logger, IHttpContextAccessor httpContextAccessor)
+    public ExpenseService(MoneyMapDbContext db, ILogger<ExpenseService> logger)
     {
         _db = db;
         _logger = logger;
-        _httpContextAccessor = httpContextAccessor;
     }
 
-    private string GetCurrentUserId()
-    {
-        return _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-    }
-
-    public void Create(Expense expense)
+    public void Create(string userId, Expense expense)
     {
         _db.Add(expense);
         _db.SaveChanges();
     }
 
-    public Expense? FindById(int id)
+    public Expense? FindById(string userId, int id)
     {
-        var currentUserId = GetCurrentUserId();
-        _logger.LogDebug("Finding expense by id: {ExpenseId} for user: {UserId}", id, currentUserId);
-        var expense = _db.Expenses.FirstOrDefault(e => e.Id == id && e.UserId == currentUserId);
+        _logger.LogDebug("Finding expense by id: {ExpenseId} for user: {UserId}", id, userId);
+        var expense = _db.Expenses.FirstOrDefault(e => e.Id == id && e.UserId == userId);
         if (expense == null)
         {
-            _logger.LogDebug("Expense with id {ExpenseId} not found for user {UserId}.", id, currentUserId);
+            _logger.LogDebug("Expense with id {ExpenseId} not found for user {UserId}.", id, userId);
         }
         else
         {
-            _logger.LogDebug("Expense with id {ExpenseId} found for user {UserId}.", id, currentUserId);
+            _logger.LogDebug("Expense with id {ExpenseId} found for user {UserId}.", id, userId);
         }
         return expense;
     }
 
-    public IList<Expense> GetAll(string? searchTerm, int? categoryId)
+    public IList<Expense> GetAll(string userId, string? searchTerm, int? categoryId)
     {
-        var currentUserId = GetCurrentUserId();
-        var query = _db.Expenses.Include("Category").Where(e => e.UserId == currentUserId);
+        var query = _db.Expenses.Include("Category").Where(e => e.UserId == userId);
         
         if (!string.IsNullOrEmpty(searchTerm))
         {
@@ -67,10 +56,9 @@ public class ExpenseService : IExpenseService
         return query.ToList();
     }
 
-    public void Remove(int id)
+    public void Remove(string userId, int id)
     {
-        var currentUserId = GetCurrentUserId();
-        var expense = _db.Expenses.FirstOrDefault(e => e.Id == id && e.UserId == currentUserId);
+        var expense = _db.Expenses.FirstOrDefault(e => e.Id == id && e.UserId == userId);
         if (expense != null)
         {
             _db.Expenses.Remove(expense);
@@ -78,10 +66,9 @@ public class ExpenseService : IExpenseService
         }
     }
 
-    public void Update(Expense expense)
+    public void Update(string userId, Expense expense)
     {
-        var currentUserId = GetCurrentUserId();
-        var oldExpense = _db.Expenses.FirstOrDefault(e => e.Id == expense.Id && e.UserId == currentUserId);
+        var oldExpense = _db.Expenses.FirstOrDefault(e => e.Id == expense.Id && e.UserId == userId);
 
         if (oldExpense != null)
         {

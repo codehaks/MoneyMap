@@ -45,34 +45,38 @@ public class CreateModel : PageModel
         if (Date < DateTime.Now.AddYears(-1))
         {
             ModelState.AddModelError("Date", "Too old!");
-
             ModelState.AddModelError("", "Can not add new expense!");
 
+            var categories = _expenseService.GetCategories();
+            CategorySelectList = new SelectList(categories, "Id", "Name");
             return Page();
         }
         else if (Date.Date > DateTime.UtcNow.Date)
         {
             ModelState.AddModelError("Date", "Can not be in future!");
 
+            var categories = _expenseService.GetCategories();
+            CategorySelectList = new SelectList(categories, "Id", "Name");
             return Page();
         }
 
         if (!ModelState.IsValid)
         {
-
+            var categories = _expenseService.GetCategories();
+            CategorySelectList = new SelectList(categories, "Id", "Name");
             return Page();
         }
 
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var userName = User.FindFirstValue(ClaimTypes.Name);
 
-        _expenseService.Create(new MoneyMap.Core.DataModels.Expense
+        _expenseService.Create(userId, new MoneyMap.Core.DataModels.Expense
         {
             CategoryId = CategoryId,
             Amount = Amount,
             Date = Date.ToUniversalTime(), //DateTime.UtcNow,
             Note = Note,
-            UserId = userId!,
+            UserId = userId,
             UserName = userName!
         });
 
