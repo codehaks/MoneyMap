@@ -1,6 +1,153 @@
 @MoneyMap.Web.Api_HostAddress = http://localhost:5137
+@TestUserId = test-user-123
+@TestUserName = testuser@example.com
 
-GET {{MoneyMap.Web.Api_HostAddress}}/weatherforecast/
+### Health Check - Test if API is running
+GET {{MoneyMap.Web.Api_HostAddress}}/api/expenses/categories
 Accept: application/json
+
+###
+
+### Get all expense categories
+GET {{MoneyMap.Web.Api_HostAddress}}/api/expenses/categories
+Accept: application/json
+
+###
+
+### Get all expenses for a user (basic)
+GET {{MoneyMap.Web.Api_HostAddress}}/api/expenses?userId={{TestUserId}}
+Accept: application/json
+
+###
+
+### Get expenses with search term
+GET {{MoneyMap.Web.Api_HostAddress}}/api/expenses?userId={{TestUserId}}&searchTerm=grocery
+Accept: application/json
+
+###
+
+### Get expenses by category (Groceries = 1)
+GET {{MoneyMap.Web.Api_HostAddress}}/api/expenses?userId={{TestUserId}}&categoryId=1
+Accept: application/json
+
+###
+
+### Get expenses with pagination
+GET {{MoneyMap.Web.Api_HostAddress}}/api/expenses?userId={{TestUserId}}&pageSize=10&pageNumber=1
+Accept: application/json
+
+###
+
+### Get expenses with date range
+GET {{MoneyMap.Web.Api_HostAddress}}/api/expenses?userId={{TestUserId}}&startDate=2024-01-01&endDate=2024-12-31
+Accept: application/json
+
+###
+
+### Get specific expense (will fail until we create one)
+GET {{MoneyMap.Web.Api_HostAddress}}/api/expenses/1?userId={{TestUserId}}
+Accept: application/json
+
+###
+
+### Create new expense - Groceries
+POST {{MoneyMap.Web.Api_HostAddress}}/api/expenses
+Content-Type: application/json
+
+{
+  "amount": 25.50,
+  "date": "2024-01-15T10:30:00",
+  "note": "Grocery shopping at Walmart",
+  "categoryId": 1,
+  "userId": "{{TestUserId}}",
+  "userName": "{{TestUserName}}"
+}
+
+###
+
+### Create new expense - Transportation
+POST {{MoneyMap.Web.Api_HostAddress}}/api/expenses
+Content-Type: application/json
+
+{
+  "amount": 45.00,
+  "date": "2024-01-16T08:15:00",
+  "note": "Gas for car",
+  "categoryId": 4,
+  "userId": "{{TestUserId}}",
+  "userName": "{{TestUserName}}"
+}
+
+###
+
+### Create new expense - Entertainment
+POST {{MoneyMap.Web.Api_HostAddress}}/api/expenses
+Content-Type: application/json
+
+{
+  "amount": 12.99,
+  "date": "2024-01-17T19:30:00",
+  "note": "Movie ticket",
+  "categoryId": 5,
+  "userId": "{{TestUserId}}",
+  "userName": "{{TestUserName}}"
+}
+
+###
+
+### Update expense (update the first expense created)
+PUT {{MoneyMap.Web.Api_HostAddress}}/api/expenses/1
+Content-Type: application/json
+
+{
+  "amount": 30.75,
+  "date": "2024-01-15T10:30:00",
+  "note": "Updated grocery shopping at Walmart - added items",
+  "categoryId": 1,
+  "userId": "{{TestUserId}}"
+}
+
+###
+
+### Delete expense (delete the last expense created)
+DELETE {{MoneyMap.Web.Api_HostAddress}}/api/expenses/3?userId={{TestUserId}}
+
+###
+
+### Error Testing - Missing UserId
+GET {{MoneyMap.Web.Api_HostAddress}}/api/expenses
+Accept: application/json
+
+###
+
+### Error Testing - Invalid expense ID
+GET {{MoneyMap.Web.Api_HostAddress}}/api/expenses/999?userId={{TestUserId}}
+Accept: application/json
+
+###
+
+### Error Testing - Invalid create request (missing required fields)
+POST {{MoneyMap.Web.Api_HostAddress}}/api/expenses
+Content-Type: application/json
+
+{
+  "amount": -10.00,
+  "note": "Invalid expense with negative amount"
+}
+
+###
+
+### Error Testing - Invalid category ID
+POST {{MoneyMap.Web.Api_HostAddress}}/api/expenses
+Content-Type: application/json
+
+{
+  "amount": 25.50,
+  "date": "2024-01-15T10:30:00",
+  "note": "Test expense",
+  "categoryId": 999,
+  "userId": "{{TestUserId}}",
+  "userName": "{{TestUserName}}"
+}
 
 ###
