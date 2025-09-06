@@ -1,0 +1,6 @@
+@MoneyMap.Web.Api_HostAddress = http://localhost:5137
+
+GET {{MoneyMap.Web.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
