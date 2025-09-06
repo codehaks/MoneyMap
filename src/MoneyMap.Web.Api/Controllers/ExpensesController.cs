@@ -1,8 +1,10 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MoneyMap.Application;
 using MoneyMap.Core.DataModels;
 using MoneyMap.Web.Api.Models;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 
 namespace MoneyMap.Web.Api.Controllers;
 
@@ -12,6 +14,7 @@ namespace MoneyMap.Web.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
+[Authorize]
 public class ExpensesController : ControllerBase
 {
     private readonly IExpenseService _expenseService;
@@ -24,9 +27,19 @@ public class ExpensesController : ControllerBase
     }
 
     /// <summary>
-    /// Get all expenses for a user with optional filtering and pagination
+    /// Gets the current user ID from the authorization context
     /// </summary>
-    /// <param name="userId">The user ID (required)</param>
+    /// <returns>The user ID</returns>
+    private string GetCurrentUserId()
+    {
+        return User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+            ?? User.FindFirst("sub")?.Value 
+            ?? throw new UnauthorizedAccessException("User ID not found in claims");
+    }
+
+    /// <summary>
+    /// Get all expenses for the current user with optional filtering and pagination
+    /// </summary>
     /// <param name="searchTerm">Optional search term to filter by note</param>
     /// <param name="categoryId">Optional category ID to filter by</param>
     /// <param name="pageSize">Number of items per page (default: 50, max: 1000)</param>
@@ -39,7 +52,6 @@ public class ExpensesController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<object>), 400)]
     [ProducesResponseType(typeof(ApiResponse<object>), 500)]
     public ActionResult<ApiResponse<PagedResult<ExpenseDto>>> GetExpenses(
-        [FromQuery, Required] string userId,
         [FromQuery] string? searchTerm = null,
         [FromQuery] int? categoryId = null,
         [FromQuery, Range(1, 1000)] int pageSize = 50,
@@ -47,17 +59,10 @@ public class ExpensesController : ControllerBase
         [FromQuery] DateTime? startDate = null,
         [FromQuery] DateTime? endDate = null)
     {
+        var userId = GetCurrentUserId();
         try
         {
-            if (string.IsNullOrWhiteSpace(userId))
-            {
-                return BadRequest(new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = "UserId is required",
-                    Errors = new List<string> { "UserId parameter cannot be null or empty" }
-                });
-            }
+          
 
             _logger.LogInformation("Getting expenses for user {UserId} with filters: searchTerm={SearchTerm}, categoryId={CategoryId}, page={PageNumber}, pageSize={PageSize}", 
                 userId, searchTerm, categoryId, pageNumber, pageSize);
@@ -122,29 +127,21 @@ public class ExpensesController : ControllerBase
     }
 
     /// <summary>
-    /// Get a specific expense by ID
+    /// Get a specific expense by ID for the current user
     /// </summary>
     /// <param name="id">The expense ID</param>
-    /// <param name="userId">The user ID</param>
     /// <returns>The expense if found</returns>
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(ApiResponse<ExpenseDto>), 200)]
     [ProducesResponseType(typeof(ApiResponse<object>), 400)]
     [ProducesResponseType(typeof(ApiResponse<object>), 404)]
     [ProducesResponseType(typeof(ApiResponse<object>), 500)]
-    public ActionResult<ApiResponse<ExpenseDto>> GetExpense(int id, [FromQuery, Required] string userId)
+    public ActionResult<ApiResponse<ExpenseDto>> GetExpense(int id)
     {
+        var userId = GetCurrentUserId();
         try
         {
-            if (string.IsNullOrWhiteSpace(userId))
-            {
-                return BadRequest(new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = "UserId is required",
-                    Errors = new List<string> { "UserId parameter cannot be null or empty" }
-                });
-            }
+
 
             _logger.LogInformation("Getting expense {ExpenseId} for user {UserId}", id, userId);
 
@@ -218,7 +215,9 @@ public class ExpensesController : ControllerBase
                 });
             }
 
-            _logger.LogInformation("Creating expense for user {UserId} with amount {Amount}", createExpenseDto.UserId, createExpenseDto.Amount);
+            var userId = GetCurrentUserId();
+
+            _logger.LogInformation("Creating expense for user {UserId} with amount {Amount}", userId, createExpenseDto.Amount);
 
             var expense = new Expense
             {
@@ -226,14 +225,14 @@ public class ExpensesController : ControllerBase
                 Date = createExpenseDto.Date,
                 Note = createExpenseDto.Note,
                 CategoryId = createExpenseDto.CategoryId,
-                UserId = createExpenseDto.UserId,
+                UserId = userId,
                 UserName = createExpenseDto.UserName
             };
 
-            _expenseService.Create(createExpenseDto.UserId, expense);
+            _expenseService.Create(userId, expense);
 
             // Retrieve the created expense to get the ID and category info
-            var createdExpense = _expenseService.FindById(createExpenseDto.UserId, expense.Id);
+            var createdExpense = _expenseService.FindById(userId, expense.Id);
             if (createdExpense == null)
             {
                 return StatusCode(500, new ApiResponse<object>
@@ -267,7 +266,8 @@ public class ExpensesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating expense for user {UserId}", createExpenseDto.UserId);
+            var userId = GetCurrentUserId();
+            _logger.LogError(ex, "Error creating expense for user {UserId}", userId);
             return StatusCode(500, new ApiResponse<object>
             {
                 Success = false,
@@ -307,16 +307,18 @@ public class ExpensesController : ControllerBase
                 });
             }
 
-            _logger.LogInformation("Updating expense {ExpenseId} for user {UserId}", id, updateExpenseDto.UserId);
+            var userId = GetCurrentUserId();
+
+            _logger.LogInformation("Updating expense {ExpenseId} for user {UserId}", id, userId);
 
             // Check if expense exists
-            var existingExpense = _expenseService.FindById(updateExpenseDto.UserId, id);
+            var existingExpense = _expenseService.FindById(userId, id);
             if (existingExpense == null)
             {
                 return NotFound(new ApiResponse<object>
                 {
                     Success = false,
-                    Message = $"Expense with ID {id} not found for user {updateExpenseDto.UserId}",
+                    Message = $"Expense with ID {id} not found for user {userId}",
                     Errors = new List<string> { "Expense not found or does not belong to the specified user" }
                 });
             }
@@ -328,14 +330,14 @@ public class ExpensesController : ControllerBase
                 Date = updateExpenseDto.Date,
                 Note = updateExpenseDto.Note,
                 CategoryId = updateExpenseDto.CategoryId,
-                UserId = updateExpenseDto.UserId,
+                UserId = userId,
                 UserName = existingExpense.UserName // Keep existing username
             };
 
-            _expenseService.Update(updateExpenseDto.UserId, expense);
+            _expenseService.Update(userId, expense);
 
             // Retrieve the updated expense
-            var updatedExpense = _expenseService.FindById(updateExpenseDto.UserId, id);
+            var updatedExpense = _expenseService.FindById(userId, id);
             if (updatedExpense == null)
             {
                 return StatusCode(500, new ApiResponse<object>
@@ -367,7 +369,8 @@ public class ExpensesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating expense {ExpenseId} for user {UserId}", id, updateExpenseDto.UserId);
+            var userId = GetCurrentUserId();
+            _logger.LogError(ex, "Error updating expense {ExpenseId} for user {UserId}", id, userId);
             return StatusCode(500, new ApiResponse<object>
             {
                 Success = false,
@@ -378,29 +381,20 @@ public class ExpensesController : ControllerBase
     }
 
     /// <summary>
-    /// Delete an expense
+    /// Delete an expense for the current user
     /// </summary>
     /// <param name="id">The expense ID</param>
-    /// <param name="userId">The user ID</param>
     /// <returns>Success response</returns>
     [HttpDelete("{id}")]
     [ProducesResponseType(typeof(ApiResponse<object>), 204)]
     [ProducesResponseType(typeof(ApiResponse<object>), 400)]
     [ProducesResponseType(typeof(ApiResponse<object>), 404)]
     [ProducesResponseType(typeof(ApiResponse<object>), 500)]
-    public ActionResult<ApiResponse<object>> DeleteExpense(int id, [FromQuery, Required] string userId)
+    public ActionResult<ApiResponse<object>> DeleteExpense(int id)
     {
         try
         {
-            if (string.IsNullOrWhiteSpace(userId))
-            {
-                return BadRequest(new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = "UserId is required",
-                    Errors = new List<string> { "UserId parameter cannot be null or empty" }
-                });
-            }
+            var userId = GetCurrentUserId();
 
             _logger.LogInformation("Deleting expense {ExpenseId} for user {UserId}", id, userId);
 
@@ -422,6 +416,7 @@ public class ExpensesController : ControllerBase
         }
         catch (Exception ex)
         {
+            var userId = GetCurrentUserId();
             _logger.LogError(ex, "Error deleting expense {ExpenseId} for user {UserId}", id, userId);
             return StatusCode(500, new ApiResponse<object>
             {
