@@ -26,7 +26,8 @@ builder.Services.AddIdentity<ApplicationUser,IdentityRole>
 
     })
     .AddDefaultUI()
-    .AddEntityFrameworkStores<MoneyMapDbContext>();
+    .AddEntityFrameworkStores<MoneyMapDbContext>()
+    .AddDefaultTokenProviders();
 
 
 builder.Services.AddAuthorization(options =>
