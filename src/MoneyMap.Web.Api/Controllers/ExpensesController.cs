@@ -256,7 +256,7 @@ public class ExpensesController : ControllerBase
             };
 
             return CreatedAtAction(nameof(GetExpense), 
-                new { id = expense.Id, userId = expense.UserId }, 
+                new { id = expense.Id }, 
                 new ApiResponse<ExpenseDto>
                 {
                     Success = true,

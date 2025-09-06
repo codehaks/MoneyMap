@@ -1,0 +1,66 @@
+@MoneyMap.Web.Api_HostAddress = http://localhost:5137
+@TestEmail = testuser@example.com
+@TestPassword = TestPassword123!
+
+### Register a new user
+POST {{MoneyMap.Web.Api_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "{{TestEmail}}",
+  "password": "{{TestPassword}}",
+  "confirmPassword": "{{TestPassword}}",
+  "userName": "testuser"
+}
+
+### Login with credentials
+# @name login
+POST {{MoneyMap.Web.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{TestEmail}}",
+  "password": "{{TestPassword}}"
+}
+
+### Extract token from login response
+@accessToken = {{login.response.body.data.accessToken}}
+
+### Get current user info
+GET {{MoneyMap.Web.Api_HostAddress}}/api/auth/me
+Authorization: Bearer {{accessToken}}
+
+### Get all expense categories (no auth required)
+GET {{MoneyMap.Web.Api_HostAddress}}/api/expenses/categories
+Accept: application/json
+
+### Get all expenses for authenticated user
+GET {{MoneyMap.Web.Api_HostAddress}}/api/expenses
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+### Get expenses with search term
+GET {{MoneyMap.Web.Api_HostAddress}}/api/expenses?searchTerm=grocery
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+### Create new expense
+POST {{MoneyMap.Web.Api_HostAddress}}/api/expenses
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "amount": 25.50,
+  "date": "2024-01-15T10:30:00",
+  "note": "Grocery shopping at Walmart",
+  "categoryId": 1,
+  "userName": "testuser"
+}
+
+### Simple logout (client-side token removal)
+POST {{MoneyMap.Web.Api_HostAddress}}/api/auth/logout
+Authorization: Bearer {{accessToken}}
+
+### Test unauthorized access (should fail)
+GET {{MoneyMap.Web.Api_HostAddress}}/api/expenses
+Accept: application/json

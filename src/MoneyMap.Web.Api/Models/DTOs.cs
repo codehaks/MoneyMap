@@ -59,11 +59,6 @@ public class CreateExpenseDto
     [Range(1, int.MaxValue, ErrorMessage = "CategoryId must be a valid category")]
     public int CategoryId { get; set; }
     
-    [Required]
-    [StringLength(450, ErrorMessage = "UserId cannot exceed 450 characters")]
-    public string UserId { get; set; } = string.Empty;
-    
-    [Required]
     [StringLength(256, ErrorMessage = "UserName cannot exceed 256 characters")]
     public string UserName { get; set; } = string.Empty;
 }
@@ -86,10 +81,6 @@ public class UpdateExpenseDto
     [Required]
     [Range(1, int.MaxValue, ErrorMessage = "CategoryId must be a valid category")]
     public int CategoryId { get; set; }
-    
-    [Required]
-    [StringLength(450, ErrorMessage = "UserId cannot exceed 450 characters")]
-    public string UserId { get; set; } = string.Empty;
 }
 
 /// <summary>
@@ -108,10 +99,6 @@ public class ExpenseCategoryDto
 /// </summary>
 public class ExpenseFilterDto
 {
-    [Required]
-    [StringLength(450, ErrorMessage = "UserId cannot exceed 450 characters")]
-    public string UserId { get; set; } = string.Empty;
-    
     [StringLength(100, ErrorMessage = "Search term cannot exceed 100 characters")]
     public string? SearchTerm { get; set; }
     
@@ -142,4 +129,61 @@ public class PagedResult<T>
     public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
     public bool HasPreviousPage => PageNumber > 1;
     public bool HasNextPage => PageNumber < TotalPages;
+}
+
+// Simple Authentication DTOs
+/// <summary>
+/// DTO for user login requests
+/// </summary>
+public class LoginRequestDto
+{
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; } = string.Empty;
+    
+    [Required]
+    [MinLength(6)]
+    public string Password { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// DTO for user registration requests
+/// </summary>
+public class RegisterRequestDto
+{
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; } = string.Empty;
+    
+    [Required]
+    [MinLength(6)]
+    public string Password { get; set; } = string.Empty;
+    
+    [Required]
+    [Compare("Password")]
+    public string ConfirmPassword { get; set; } = string.Empty;
+    
+    [MaxLength(256)]
+    public string? UserName { get; set; }
+}
+
+/// <summary>
+/// DTO for authentication responses
+/// </summary>
+public class AuthResponseDto
+{
+    public string AccessToken { get; set; } = string.Empty;
+    public DateTime ExpiresAt { get; set; }
+    public UserInfoDto User { get; set; } = new();
+}
+
+/// <summary>
+/// DTO for user information
+/// </summary>
+public class UserInfoDto
+{
+    public string Id { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string UserName { get; set; } = string.Empty;
+    public List<string> Roles { get; set; } = new();
 }
