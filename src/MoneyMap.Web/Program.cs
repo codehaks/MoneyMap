@@ -43,6 +43,7 @@ builder.Services.AddRazorPages().AddRazorPagesOptions(options =>
     options.Conventions.AuthorizeAreaFolder("admin", "/", "RequireAdminRole");
 });
 
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<IExpenseService, ExpenseService>();
 builder.Services.AddTransient<ICalendarService, CalendarService>();
 builder.Services.AddTransient<IUserService, UserService>();

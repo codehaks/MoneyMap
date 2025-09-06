@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using MoneyMap.Application;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 
 namespace MoneyMap.Web.Areas.Users.Pages.Expenses;
 
@@ -62,12 +63,17 @@ public class CreateModel : PageModel
             return Page();
         }
 
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userName = User.FindFirstValue(ClaimTypes.Name);
+
         _expenseService.Create(new MoneyMap.Core.DataModels.Expense
         {
             CategoryId = CategoryId,
             Amount = Amount,
             Date = Date.ToUniversalTime(), //DateTime.UtcNow,
-            Note = Note
+            Note = Note,
+            UserId = userId!,
+            UserName = userName!
         });
 
         // redirect to Index page
