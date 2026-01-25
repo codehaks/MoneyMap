@@ -7,6 +7,7 @@ using MoneyMap.Application;
 using MoneyMap.Application.Services;
 using MoneyMap.Infrastructure.Data;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<MoneyMapDbContext>(options =>
