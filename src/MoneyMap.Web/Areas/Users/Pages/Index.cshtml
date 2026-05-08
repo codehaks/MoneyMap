@@ -1,155 +1,283 @@
-﻿@page
+@page
 @model MoneyMap.Web.Areas.Users.Pages.IndexModel
 @{
     ViewBag.Title = "Dashboard";
 }
 
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Dashboard</h1>
-    <div class="btn-toolbar mb-2 mb-md-0">
-        <div class="btn-group me-2">
-            <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
-        </div>
-        <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle d-flex align-items-center gap-1">
-            <i class="fas fa-calendar-alt me-1"></i>
-            This Month
-        </button>
+<header class="mm-page-head">
+    <div>
+        <span class="mm-eyebrow">Overview</span>
+        <h1>Good evening.</h1>
+        <p>Here's where your money went this month.</p>
     </div>
-</div>
+    <div class="mm-segmented" role="tablist" aria-label="Time range">
+        <button type="button">7D</button>
+        <button type="button" class="is-active">30D</button>
+        <button type="button">90D</button>
+        <button type="button">YTD</button>
+        <button type="button">All</button>
+    </div>
+</header>
 
-<div class="row my-4">
-    <div class="col-md-4">
-        <div class="card card-dashboard h-100">
+<section class="row g-3 mb-4">
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card mm-stat" data-flow="in">
+            <div class="mm-stat__head">
+                <span class="mm-stat__label">Income</span>
+                <span class="mm-stat__icon"><i class="fas fa-arrow-up"></i></span>
+            </div>
+            <div class="mm-stat__value mm-num">$4,820.00</div>
+            <div class="mm-stat__delta mm-delta-up"><i class="fas fa-caret-up"></i> 3.4% vs. last month</div>
+            <div class="mm-spark" aria-hidden="true"></div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card mm-stat" data-flow="out">
+            <div class="mm-stat__head">
+                <span class="mm-stat__label">Expenses</span>
+                <span class="mm-stat__icon"><i class="fas fa-arrow-down"></i></span>
+            </div>
+            <div class="mm-stat__value mm-num">$1,240.56</div>
+            <div class="mm-stat__delta mm-delta-down"><i class="fas fa-caret-down"></i> 1.8% vs. last month</div>
+            <div class="mm-spark" aria-hidden="true"></div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card mm-stat">
+            <div class="mm-stat__head">
+                <span class="mm-stat__label">Net flow</span>
+                <span class="mm-stat__icon"><i class="fas fa-equals"></i></span>
+            </div>
+            <div class="mm-stat__value mm-num">+ $3,579.44</div>
+            <div class="mm-stat__delta">Saved this month</div>
+            <div class="mm-spark" aria-hidden="true"></div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card mm-stat">
+            <div class="mm-stat__head">
+                <span class="mm-stat__label">Budget used</span>
+                <span class="mm-stat__icon"><i class="fas fa-circle-half-stroke"></i></span>
+            </div>
+            <div class="mm-stat__value mm-num">65%</div>
+            <div class="mm-stat__delta">$659 remaining of $1,900</div>
+            <div class="mm-spark" aria-hidden="true"></div>
+        </div>
+    </div>
+</section>
+
+<section class="row g-3 mb-4">
+    <div class="col-12 col-xl-8">
+        <div class="card h-100">
             <div class="card-body">
-                <h5 class="card-title">Total Expenses</h5>
-                <h2 class="display-5 fw-bold text-primary">$1,240.56</h2>
-                <p class="card-text text-muted">This Month</p>
-                <div class="progress" style="height: 5px;">
-                    <div class="progress-bar bg-primary" role="progressbar" style="width: 75%;" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                    <div>
+                        <span class="mm-eyebrow">Cash flow</span>
+                        <h2 class="mt-1 mb-0">Income vs. expenses</h2>
+                    </div>
+                    <div class="mm-chart-legend">
+                        <span><span class="mm-legend-dot in"></span>Income</span>
+                        <span><span class="mm-legend-dot out"></span>Expenses</span>
+                    </div>
+                </div>
+                <div class="mm-chart-shell">
+                    <canvas id="expenseChart"></canvas>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card card-dashboard h-100">
+
+    <div class="col-12 col-xl-4">
+        <div class="card h-100">
             <div class="card-body">
-                <h5 class="card-title">Budget Used</h5>
-                <h2 class="display-5 fw-bold text-success">65%</h2>
-                <p class="card-text text-muted">$1,240.56 of $1,900</p>
-                <div class="progress" style="height: 5px;">
-                    <div class="progress-bar bg-success" role="progressbar" style="width: 65%;" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div>
+                        <span class="mm-eyebrow">Top categories</span>
+                        <h2 class="mt-1 mb-0">Where it goes</h2>
+                    </div>
+                    <a asp-page="/Expenses/Index" class="small">See all</a>
+                </div>
+
+                <div class="mm-cat-row">
+                    <span>Groceries</span>
+                    <span class="mm-num">$420.25</span>
+                    <div class="mm-cat-bar"><span style="width: 78%"></span></div>
+                </div>
+                <div class="mm-cat-row">
+                    <span>Dining Out</span>
+                    <span class="mm-num">$218.55</span>
+                    <div class="mm-cat-bar"><span style="width: 48%"></span></div>
+                </div>
+                <div class="mm-cat-row">
+                    <span>Transportation</span>
+                    <span class="mm-num">$144.00</span>
+                    <div class="mm-cat-bar"><span style="width: 32%"></span></div>
+                </div>
+                <div class="mm-cat-row">
+                    <span>Utilities</span>
+                    <span class="mm-num">$120.88</span>
+                    <div class="mm-cat-bar"><span style="width: 28%"></span></div>
+                </div>
+                <div class="mm-cat-row">
+                    <span>Entertainment</span>
+                    <span class="mm-num">$25.99</span>
+                    <div class="mm-cat-bar"><span style="width: 11%"></span></div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card card-dashboard h-100">
-            <div class="card-body">
-                <h5 class="card-title">Top Category</h5>
-                <h2 class="display-5 fw-bold text-warning">Groceries</h2>
-                <p class="card-text text-muted">$420.25 (33.8%)</p>
-                <div class="progress" style="height: 5px;">
-                    <div class="progress-bar bg-warning" role="progressbar" style="width: 33%;" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
+</section>
+
+<section class="card">
+    <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+            <div>
+                <span class="mm-eyebrow">Activity</span>
+                <h2 class="mt-1 mb-0">Recent transactions</h2>
+            </div>
+            <div class="d-flex gap-2">
+                <a asp-page="/Expenses/Index" class="btn btn-outline-secondary btn-sm">View all</a>
+                <a asp-page="/Expenses/Create" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus me-1"></i> New expense
+                </a>
             </div>
         </div>
+
+        <ul class="mm-tx">
+            <li data-flow="out">
+                <span class="mm-tx__icon"><i class="fas fa-basket-shopping"></i></span>
+                <div class="mm-tx__meta">
+                    <div class="mm-tx__title">Weekly grocery shopping</div>
+                    <div class="mm-tx__sub">
+                        <span class="mm-pill">Groceries</span>
+                        <span>Aug 14, 2025</span>
+                    </div>
+                </div>
+                <div class="mm-tx__amount mm-num" data-flow="out">$85.43</div>
+            </li>
+            <li data-flow="out">
+                <span class="mm-tx__icon"><i class="fas fa-gas-pump"></i></span>
+                <div class="mm-tx__meta">
+                    <div class="mm-tx__title">Gas refill</div>
+                    <div class="mm-tx__sub">
+                        <span class="mm-pill">Transportation</span>
+                        <span>Aug 13, 2025</span>
+                    </div>
+                </div>
+                <div class="mm-tx__amount mm-num" data-flow="out">$45.00</div>
+            </li>
+            <li data-flow="out">
+                <span class="mm-tx__icon"><i class="fas fa-utensils"></i></span>
+                <div class="mm-tx__meta">
+                    <div class="mm-tx__title">Dinner with family</div>
+                    <div class="mm-tx__sub">
+                        <span class="mm-pill">Dining Out</span>
+                        <span>Aug 12, 2025</span>
+                    </div>
+                </div>
+                <div class="mm-tx__amount mm-num" data-flow="out">$62.75</div>
+            </li>
+            <li data-flow="out">
+                <span class="mm-tx__icon"><i class="fas fa-bolt"></i></span>
+                <div class="mm-tx__meta">
+                    <div class="mm-tx__title">Electricity bill</div>
+                    <div class="mm-tx__sub">
+                        <span class="mm-pill">Utilities</span>
+                        <span>Aug 10, 2025</span>
+                    </div>
+                </div>
+                <div class="mm-tx__amount mm-num" data-flow="out">$120.88</div>
+            </li>
+            <li data-flow="out">
+                <span class="mm-tx__icon"><i class="fas fa-film"></i></span>
+                <div class="mm-tx__meta">
+                    <div class="mm-tx__title">Movie tickets</div>
+                    <div class="mm-tx__sub">
+                        <span class="mm-pill">Entertainment</span>
+                        <span>Aug 8, 2025</span>
+                    </div>
+                </div>
+                <div class="mm-tx__amount mm-num" data-flow="out">$25.99</div>
+            </li>
+        </ul>
     </div>
-</div>
-
-<h3 class="mt-4 mb-3">Recent Expenses</h3>
-<div class="table-responsive">
-    <table class="table table-striped table-hover">
-        <thead>
-            <tr>
-                <th>Category</th>
-                <th>Amount</th>
-                <th>Date</th>
-                <th>Note</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Groceries</td>
-                <td>$85.43</td>
-                <td>Aug 14, 2025</td>
-                <td>Weekly grocery shopping</td>
-            </tr>
-            <tr>
-                <td>Transportation</td>
-                <td>$45.00</td>
-                <td>Aug 13, 2025</td>
-                <td>Gas refill</td>
-            </tr>
-            <tr>
-                <td>Dining Out</td>
-                <td>$62.75</td>
-                <td>Aug 12, 2025</td>
-                <td>Dinner with family</td>
-            </tr>
-            <tr>
-                <td>Utilities</td>
-                <td>$120.88</td>
-                <td>Aug 10, 2025</td>
-                <td>Electricity bill</td>
-            </tr>
-            <tr>
-                <td>Entertainment</td>
-                <td>$25.99</td>
-                <td>Aug 8, 2025</td>
-                <td>Movie tickets</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-
-<div class="d-flex justify-content-between mt-4">
-    <a asp-page="/Expenses/Index" class="btn btn-primary">View All Expenses</a>
-    <a asp-page="/Expenses/Create" class="btn btn-outline-primary">Add New Expense</a>
-</div>
-
-<h3 class="mt-5 mb-3">Monthly Overview</h3>
-<canvas class="my-4 w-100" id="expenseChart" width="900" height="380"></canvas>
+</section>
 
 @section scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const ctx = document.getElementById('expenseChart');
-            
+            var ctx = document.getElementById('expenseChart');
+            if (!ctx) return;
+
+            var styles = getComputedStyle(document.documentElement);
+            var ink     = styles.getPropertyValue('--mm-ink').trim()        || '#1f2229';
+            var muted   = styles.getPropertyValue('--mm-ink-muted').trim()  || '#8a91a0';
+            var line    = styles.getPropertyValue('--mm-line').trim()       || '#e7e1d6';
+            var pos     = styles.getPropertyValue('--mm-positive').trim()   || '#2f4a3f';
+            var neg     = styles.getPropertyValue('--mm-negative').trim()   || '#7a3a2e';
+
             new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-                    datasets: [{
-                        label: 'Monthly Expenses',
-                        data: [1250, 1420, 1320, 1450, 1200, 1350, 1100, 1240],
-                        borderWidth: 3,
-                        tension: 0.1,
-                        fill: false,
-                        backgroundColor: 'rgba(13, 110, 253, 0.2)',
-                        borderColor: 'rgba(13, 110, 253, 1)',
-                        pointBackgroundColor: 'rgba(13, 110, 253, 1)',
-                        pointRadius: 4
-                    }]
+                    datasets: [
+                        {
+                            label: 'Income',
+                            data: [4500, 4500, 4700, 4700, 4820, 4820, 4820, 4820],
+                            borderColor: pos,
+                            backgroundColor: pos + '22',
+                            borderWidth: 2,
+                            tension: .35,
+                            fill: false,
+                            pointRadius: 0,
+                            pointHoverRadius: 4
+                        },
+                        {
+                            label: 'Expenses',
+                            data: [1250, 1420, 1320, 1450, 1200, 1350, 1100, 1240],
+                            borderColor: neg,
+                            backgroundColor: neg + '22',
+                            borderWidth: 2,
+                            tension: .35,
+                            fill: true,
+                            pointRadius: 0,
+                            pointHoverRadius: 4
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
                     plugins: {
-                        legend: {
-                            position: 'top',
-                        },
-                        title: {
-                            display: true,
-                            text: 'Expense Trends'
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: ink,
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            padding: 10,
+                            cornerRadius: 8,
+                            displayColors: true
                         }
                     },
                     scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: muted, font: { size: 11 } },
+                            border: { color: line }
+                        },
                         y: {
                             beginAtZero: true,
+                            grid: { color: line, drawBorder: false },
                             ticks: {
-                                callback: function(value) {
-                                    return '$' + value;
-                                }
-                            }
+                                color: muted,
+                                font: { size: 11 },
+                                callback: function (value) { return '$' + value; }
+                            },
+                            border: { display: false }
                         }
                     }
                 }

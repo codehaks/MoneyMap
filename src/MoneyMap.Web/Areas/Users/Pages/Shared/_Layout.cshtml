@@ -1,182 +1,146 @@
-﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Identity
 @using MoneyMap.Infrastructure.Data
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
+@{
+    var page = ViewContext.RouteData.Values["page"]?.ToString() ?? string.Empty;
+    bool IsActive(string match) => page.Equals(match, StringComparison.OrdinalIgnoreCase);
+    bool IsArea(string prefix) => page.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
+    var userName = SignInManager.IsSignedIn(User) ? UserManager.GetUserName(User) : null;
+    var initials = !string.IsNullOrEmpty(userName)
+        ? string.Concat(userName.Split(new[] { ' ', '.', '@' }, StringSplitOptions.RemoveEmptyEntries)
+                                .Take(2).Select(s => char.ToUpper(s[0])))
+        : "?";
+}
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="auto">
+<html lang="en" data-bs-theme="light">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="MoneyMap - Personal Finance Management">
+    <meta name="description" content="MoneyMap — Personal Finance Management">
     <title>@ViewBag.Title - MoneyMap</title>
 
-    <!-- Bootstrap CSS -->
     <link href="~/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
     <link href="~/lib/font-awesome/css/all.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
     <link href="~/css/dashboard.css" rel="stylesheet">
-    <!-- Dropdown Fix -->
     <link href="~/css/dropdown-fix.css" rel="stylesheet">
+    <link href="~/css/moneymap-theme.css" rel="stylesheet">
 </head>
 <body>
 
-    <header class="navbar sticky-top bg-primary flex-md-nowrap p-0 shadow" data-bs-theme="dark">
-        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="#">MoneyMap</a>
+<div class="mm-app">
 
-        <ul class="navbar-nav flex-row d-md-none">
-            <li class="nav-item text-nowrap">
-                <button class="nav-link px-3 text-white" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </li>
-        </ul>
+    <aside class="mm-sidebar" id="mmSidebar">
+        <a class="mm-brand" asp-area="Users" asp-page="/Index">
+            <span class="mm-brand-mark">M</span>
+            <span>MoneyMap</span>
+        </a>
 
-        @if (SignInManager.IsSignedIn(User))
-        {
-            <div class="ms-auto me-3 position-relative">
-                <div class="dropdown">
-                    <a class="nav-link dropdown-toggle text-white d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-user-circle me-2" style="font-size: 16px;"></i>
-                        <span>@UserManager.GetUserName(User)</span>
+        <nav aria-label="Primary">
+            <ul class="mm-nav">
+                <li>
+                    <span class="mm-nav-section">Workspace</span>
+                </li>
+                <li>
+                    <a asp-area="Users" asp-page="/Index" class="@(IsActive("/Index") ? "is-active" : "")">
+                        <i class="fas fa-chart-line"></i> Dashboard
                     </a>
-                    <div class="dropdown-menu dropdown-menu-end position-absolute shadow" aria-labelledby="userDropdown">
-                        <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">
-                            <i class="fas fa-cog me-2" style="font-size: 16px;"></i>
-                            Account Settings
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <form class="m-0" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Index", new { area = "" })">
-                            <button type="submit" class="dropdown-item">
-                                <i class="fas fa-sign-out-alt me-2" style="font-size: 16px;"></i>
-                                Sign Out
-                            </button>
-                        </form>
-                    </div>
-                </div>
+                </li>
+                <li>
+                    <a asp-area="Users" asp-page="/Expenses/Index" class="@(IsArea("/Expenses") ? "is-active" : "")">
+                        <i class="fas fa-receipt"></i> Expenses
+                    </a>
+                </li>
+                <li>
+                    <a href="#"><i class="fas fa-tags"></i> Categories</a>
+                </li>
+                <li>
+                    <a href="#"><i class="fas fa-chart-pie"></i> Reports</a>
+                </li>
+
+                <li><span class="mm-nav-section">Account</span></li>
+                <li>
+                    <a asp-area="Identity" asp-page="/Account/Manage/Index">
+                        <i class="fas fa-cog"></i> Settings
+                    </a>
+                </li>
+                <li>
+                    <form method="post" asp-area="Identity" asp-page="/Account/Logout"
+                          asp-route-returnUrl="@Url.Page("/Index", new { area = "" })" class="m-0">
+                        <button type="submit"><i class="fas fa-sign-out-alt"></i> Sign out</button>
+                    </form>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="mm-sidebar-footer">
+            <span class="mm-avatar">@initials</span>
+            <div>
+                <div style="color: var(--mm-ink); font-weight: 500; font-size: .88rem;">@userName</div>
+                <div style="font-size: .75rem;">Personal plan</div>
             </div>
-        }
-    </header>
-
-    <div class="container-fluid">
-        <div class="row">
-            <div class="sidebar border border-right col-md-3 col-lg-2 p-0 bg-body-tertiary">
-                <div class="offcanvas-md offcanvas-end bg-body-tertiary" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
-                    <div class="offcanvas-header">
-                        <h5 class="offcanvas-title" id="sidebarMenuLabel">MoneyMap</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#sidebarMenu" aria-label="Close"></button>
-                    </div>
-                    <div class="offcanvas-body d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto">
-                        <ul class="nav flex-column">
-                            <li class="nav-item">
-                                <a class="nav-link d-flex align-items-center gap-2 @(ViewContext.RouteData.Values["page"]?.ToString() == "/Index" ? "active" : "")"
-                                   aria-current="page" asp-area="Users" asp-page="/Index">
-                                    <i class="fas fa-home"></i>
-                                    Dashboard
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link d-flex align-items-center gap-2 @(ViewContext.RouteData.Values["page"]?.ToString()?.Contains("/Expenses") == true ? "active" : "")"
-                                   asp-area="Users" asp-page="/Expenses/Index">
-                                    <i class="fas fa-credit-card"></i>
-                                    Expenses
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link d-flex align-items-center gap-2" href="#">
-                                    <i class="fas fa-chart-line"></i>
-                                    Reports
-                                </a>
-                            </li>
-                        </ul>
-
-                        <hr class="my-3">
-
-                        <ul class="nav flex-column mb-auto">
-                            <li class="nav-item">
-                                <a class="nav-link d-flex align-items-center gap-2" asp-area="Identity" asp-page="/Account/Manage/Index">
-                                    <i class="fas fa-cog"></i>
-                                    Settings
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <form method="post" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Index", new { area = "" })">
-                                    <button type="submit" class="nav-link d-flex align-items-center gap-2 border-0 bg-transparent">
-                                        <i class="fas fa-sign-out-alt"></i>
-                                        Sign out
-                                    </button>
-                                </form>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                @RenderBody()
-            </main>
         </div>
-    </div>
+    </aside>
+    <div class="mm-backdrop" id="mmBackdrop"></div>
 
-    <!-- jQuery -->
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <!-- Bootstrap JS -->
-    <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <!-- Chart JS (if needed) -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.2/dist/chart.umd.js" integrity="sha384-eI7PSr3L1XLISH8JdDII5YN/njoSsxfbrkCTnJrzXt+ENP5MOVBxD+l6sEG4zoLp" crossorigin="anonymous"></script>
-
-    <!-- Initialize dropdowns -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // Initialize all dropdowns with correct positioning
-            var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
-            var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
-                return new bootstrap.Dropdown(dropdownToggleEl, {
-                    popperConfig: function(defaultConfig) {
-                        // Override Popper.js settings to fix positioning issues
-                        return {
-                            ...defaultConfig,
-                            modifiers: [
-                                {
-                                    name: 'preventOverflow',
-                                    options: {
-                                        boundary: 'viewport'
-                                    }
-                                },
-                                {
-                                    name: 'computeStyles',
-                                    options: {
-                                        gpuAcceleration: false // Prevents transform styles that might interfere with our CSS
-                                    }
-                                }
-                            ]
-                        };
-                    }
-                });
-            });
-
-            // Fix dropdown positioning
-            var userDropdown = document.getElementById('userDropdown');
-            if (userDropdown) {
-                userDropdown.addEventListener('show.bs.dropdown', function () {
-                    setTimeout(function() {
-                        // Force position to be absolute with correct coordinates
-                        var menu = document.querySelector('.dropdown-menu');
-                        if (menu) {
-                            menu.style.position = 'absolute';
-                            menu.style.inset = 'auto auto auto auto';
-                            menu.style.transform = 'none';
-                        }
-                    }, 0);
-                });
+    <main class="mm-main">
+        <div class="mm-topbar">
+            <button type="button" class="mm-mobile-toggle" id="mmToggle" aria-label="Open menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="mm-search">
+                <input type="search" placeholder="Search transactions, categories..." aria-label="Search" />
+            </div>
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <div class="dropdown">
+                    <a class="dropdown-toggle d-flex align-items-center gap-2" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="mm-avatar">@initials</span>
+                        <span class="d-none d-sm-inline">@userName</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">
+                                <i class="fas fa-cog me-2 text-muted"></i>Account settings
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form class="m-0" method="post" asp-area="Identity" asp-page="/Account/Logout"
+                                  asp-route-returnUrl="@Url.Page("/Index", new { area = "" })">
+                                <button type="submit" class="dropdown-item">
+                                    <i class="fas fa-sign-out-alt me-2 text-muted"></i>Sign out
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
             }
+        </div>
 
-            console.log("Dropdowns initialized:", dropdownList.length);
-        });
-    </script>
+        <div class="mm-content">
+            @RenderBody()
+        </div>
+    </main>
+</div>
 
-    @RenderSection("scripts", false)
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.2/dist/chart.umd.js" integrity="sha384-eI7PSr3L1XLISH8JdDII5YN/njoSsxfbrkCTnJrzXt+ENP5MOVBxD+l6sEG4zoLp" crossorigin="anonymous"></script>
+<script>
+    (function () {
+        var sidebar = document.getElementById('mmSidebar');
+        var backdrop = document.getElementById('mmBackdrop');
+        var toggle = document.getElementById('mmToggle');
+        function open() { sidebar.classList.add('is-open'); backdrop.classList.add('is-visible'); }
+        function close() { sidebar.classList.remove('is-open'); backdrop.classList.remove('is-visible'); }
+        if (toggle) toggle.addEventListener('click', open);
+        if (backdrop) backdrop.addEventListener('click', close);
+    })();
+</script>
+
+@RenderSection("scripts", false)
 </body>
 </html>

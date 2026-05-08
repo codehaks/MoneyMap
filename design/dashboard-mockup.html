@@ -1,0 +1,750 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MoneyMap — Dashboard</title>
+
+<!-- Local Bootstrap 5.3 (from wwwroot/lib). Adjust the relative path when wiring into the Razor layout. -->
+<link rel="stylesheet" href="../src/MoneyMap.Web/wwwroot/lib/bootstrap/css/bootstrap.min.css" />
+
+<style>
+/* =========================================================================
+   MoneyMap — design tokens
+   Fill the --mm-* palette variables with your own hex values later.
+   The mockup uses opacity-based variants so income/expense feel paired,
+   not opposed.
+   ========================================================================= */
+:root {
+  /* PALETTE PLACEHOLDERS — replace with your chosen hex codes */
+  --mm-bg:           /* page background (warm off-white) */ #f6f3ee;
+  --mm-surface:      /* card surface */                     #ffffff;
+  --mm-surface-alt:  /* nested / subtle surface */          #faf7f2;
+  --mm-ink:          /* primary text */                     #1f2229;
+  --mm-ink-soft:     /* secondary text */                   #5b6270;
+  --mm-ink-muted:    /* tertiary / hints */                 #8a91a0;
+  --mm-line:         /* hairlines & borders */              #e7e1d6;
+  --mm-line-strong:  /* dividers on hover/focus */          #d6cfc1;
+  --mm-accent:       /* brand accent (deep, not loud) */    #2f4a3f;
+  --mm-accent-soft:  /* tinted accent surface */            #e8efe9;
+  --mm-positive:     /* income directional cue */           #2f4a3f;
+  --mm-negative:     /* expense directional cue */          #7a3a2e;
+  --mm-warn:         /* gentle warning */                   #8a6a1f;
+
+  /* shape & motion */
+  --mm-radius-sm: 8px;
+  --mm-radius:    12px;
+  --mm-radius-lg: 18px;
+  --mm-shadow-1:  0 1px 0 rgba(20,22,28,.04), 0 1px 2px rgba(20,22,28,.04);
+  --mm-shadow-2:  0 1px 0 rgba(20,22,28,.04), 0 8px 24px -12px rgba(20,22,28,.18);
+  --mm-ease:      cubic-bezier(.2,.7,.2,1);
+
+  /* type */
+  --mm-font-sans:    "Inter", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --mm-font-display: "Source Serif 4", "Source Serif Pro", Georgia, "Times New Roman", serif;
+  --mm-font-num:     "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+
+/* =========================================================================
+   Base / Bootstrap overrides
+   The point of these overrides is to break out of the "default Bootstrap" feel:
+   serif display headings, flatter cards, hairline borders instead of shadows,
+   tabular numerals everywhere money is shown.
+   ========================================================================= */
+html, body { background: var(--mm-bg); }
+body {
+  font-family: var(--mm-font-sans);
+  color: var(--mm-ink);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "ss01", "cv11";
+}
+h1, h2, h3, .mm-display {
+  font-family: var(--mm-font-display);
+  font-weight: 600;
+  letter-spacing: -.01em;
+  color: var(--mm-ink);
+}
+h1 { font-size: 1.75rem; }
+h2 { font-size: 1.25rem; }
+.mm-eyebrow {
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--mm-ink-muted);
+}
+.mm-num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+a { color: var(--mm-accent); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* Buttons — flatter, outline-first */
+.btn {
+  --bs-btn-border-radius: var(--mm-radius-sm);
+  font-weight: 500;
+  padding: .55rem 1rem;
+  transition: background .15s var(--mm-ease), border-color .15s var(--mm-ease);
+}
+.btn-primary {
+  --bs-btn-bg: var(--mm-accent);
+  --bs-btn-border-color: var(--mm-accent);
+  --bs-btn-hover-bg: var(--mm-ink);
+  --bs-btn-hover-border-color: var(--mm-ink);
+  --bs-btn-active-bg: var(--mm-ink);
+}
+.btn-outline-secondary {
+  --bs-btn-color: var(--mm-ink);
+  --bs-btn-border-color: var(--mm-line-strong);
+  --bs-btn-hover-bg: var(--mm-surface-alt);
+  --bs-btn-hover-color: var(--mm-ink);
+  --bs-btn-hover-border-color: var(--mm-line-strong);
+}
+
+/* Cards — borderless shadow style replaced with hairline + low shadow */
+.card {
+  background: var(--mm-surface);
+  border: 1px solid var(--mm-line);
+  border-radius: var(--mm-radius);
+  box-shadow: var(--mm-shadow-1);
+}
+.card-body { padding: 1.25rem 1.25rem; }
+
+/* Form controls — softer */
+.form-control, .form-select {
+  border-radius: var(--mm-radius-sm);
+  border-color: var(--mm-line);
+  background: var(--mm-surface);
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--mm-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--mm-accent) 18%, transparent);
+}
+
+/* =========================================================================
+   App shell — sidebar + topbar + content
+   ========================================================================= */
+.mm-app {
+  display: grid;
+  grid-template-columns: 248px 1fr;
+  min-height: 100vh;
+}
+.mm-sidebar {
+  background: var(--mm-surface);
+  border-right: 1px solid var(--mm-line);
+  padding: 1.25rem 1rem;
+  position: sticky; top: 0; height: 100vh;
+  display: flex; flex-direction: column; gap: 1.5rem;
+}
+.mm-brand {
+  display: flex; align-items: center; gap: .65rem;
+  font-family: var(--mm-font-display);
+  font-weight: 600;
+  font-size: 1.15rem;
+  padding: .25rem .5rem;
+}
+.mm-brand-mark {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: var(--mm-accent);
+  color: #fff;
+  display: grid; place-items: center;
+  font-family: var(--mm-font-display);
+  font-size: .9rem;
+}
+.mm-nav { display: flex; flex-direction: column; gap: 2px; }
+.mm-nav a {
+  display: flex; align-items: center; gap: .75rem;
+  padding: .55rem .65rem;
+  border-radius: var(--mm-radius-sm);
+  color: var(--mm-ink-soft);
+  font-weight: 500;
+  position: relative;
+}
+.mm-nav a:hover { background: var(--mm-surface-alt); color: var(--mm-ink); text-decoration: none; }
+.mm-nav a.is-active {
+  color: var(--mm-ink);
+  background: var(--mm-accent-soft);
+}
+.mm-nav a.is-active::before {
+  content: "";
+  position: absolute; left: -1rem; top: 8px; bottom: 8px;
+  width: 3px; border-radius: 0 3px 3px 0;
+  background: var(--mm-accent);
+}
+.mm-nav-section {
+  font-size: .7rem;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--mm-ink-muted);
+  padding: .25rem .65rem;
+  margin-top: .5rem;
+}
+.mm-sidebar-footer {
+  margin-top: auto;
+  padding: .75rem .5rem;
+  border-top: 1px solid var(--mm-line);
+  display: flex; align-items: center; gap: .65rem;
+  color: var(--mm-ink-soft);
+  font-size: .85rem;
+}
+.mm-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--mm-accent-soft);
+  display: grid; place-items: center;
+  font-weight: 600; color: var(--mm-accent);
+  font-size: .8rem;
+}
+
+.mm-main { display: flex; flex-direction: column; min-width: 0; }
+.mm-topbar {
+  display: flex; align-items: center; gap: 1rem;
+  padding: 1rem 1.75rem;
+  background: var(--mm-bg);
+  border-bottom: 1px solid var(--mm-line);
+  position: sticky; top: 0; z-index: 5;
+  backdrop-filter: saturate(180%) blur(8px);
+}
+.mm-search {
+  flex: 1; max-width: 480px;
+  position: relative;
+}
+.mm-search input {
+  width: 100%;
+  padding: .55rem .75rem .55rem 2.25rem;
+  border: 1px solid var(--mm-line);
+  border-radius: var(--mm-radius-sm);
+  background: var(--mm-surface);
+  font-size: .9rem;
+}
+.mm-search::before {
+  content: "⌕";
+  position: absolute; left: .75rem; top: 50%; transform: translateY(-50%);
+  color: var(--mm-ink-muted);
+}
+.mm-content { padding: 1.75rem; }
+
+/* =========================================================================
+   Page header
+   ========================================================================= */
+.mm-page-head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;
+}
+.mm-page-head h1 { margin: 0; }
+.mm-page-head p { margin: .15rem 0 0; color: var(--mm-ink-soft); }
+
+/* Segmented control (time range) */
+.mm-segmented {
+  display: inline-flex;
+  background: var(--mm-surface);
+  border: 1px solid var(--mm-line);
+  border-radius: var(--mm-radius-sm);
+  padding: 3px;
+  box-shadow: var(--mm-shadow-1);
+}
+.mm-segmented button {
+  border: 0; background: transparent;
+  padding: .35rem .85rem;
+  font-size: .85rem; font-weight: 500;
+  border-radius: 6px;
+  color: var(--mm-ink-soft);
+  cursor: pointer;
+}
+.mm-segmented button.is-active {
+  background: var(--mm-ink);
+  color: #fff;
+}
+
+/* =========================================================================
+   Stat cards
+   Income/expense differentiation: directional glyph + tinted icon chip,
+   subtle left underline. No bright color blocks.
+   ========================================================================= */
+.mm-stat {
+  padding: 1.1rem 1.2rem;
+  display: flex; flex-direction: column; gap: .65rem;
+  position: relative;
+  overflow: hidden;
+}
+.mm-stat__head {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.mm-stat__label {
+  font-size: .78rem;
+  color: var(--mm-ink-muted);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.mm-stat__icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: grid; place-items: center;
+  background: var(--mm-surface-alt);
+  color: var(--mm-ink-soft);
+  font-size: 14px;
+}
+.mm-stat__value {
+  font-family: var(--mm-font-display);
+  font-size: 1.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.01em;
+}
+.mm-stat__delta {
+  display: inline-flex; align-items: center; gap: .35rem;
+  font-size: .82rem; font-weight: 500;
+  color: var(--mm-ink-soft);
+}
+.mm-delta-up   { color: var(--mm-positive); }
+.mm-delta-down { color: var(--mm-negative); }
+
+/* directional rule under value to subtly distinguish in/out */
+.mm-stat[data-flow="in"]::after,
+.mm-stat[data-flow="out"]::after {
+  content: "";
+  position: absolute;
+  left: 1.2rem; right: 1.2rem; bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  opacity: .6;
+}
+.mm-stat[data-flow="in"]::after  { background: var(--mm-positive); }
+.mm-stat[data-flow="out"]::after { background: var(--mm-negative); }
+
+.mm-spark {
+  height: 36px;
+  background: linear-gradient(180deg, var(--mm-surface-alt), transparent);
+  border-radius: 6px;
+  position: relative;
+}
+.mm-spark::before {
+  /* placeholder line — replace with chart lib */
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, transparent 60%, color-mix(in srgb, var(--mm-accent) 12%, transparent)),
+    repeating-linear-gradient(90deg, var(--mm-line) 0 1px, transparent 1px 24px);
+  border-bottom: 1px dashed var(--mm-line);
+  border-radius: inherit;
+}
+
+/* =========================================================================
+   Chart placeholder
+   ========================================================================= */
+.mm-chart {
+  height: 280px;
+  border-radius: var(--mm-radius-sm);
+  background:
+    repeating-linear-gradient(0deg, var(--mm-line) 0 1px, transparent 1px 56px),
+    repeating-linear-gradient(90deg, var(--mm-line) 0 1px, transparent 1px 80px),
+    var(--mm-surface-alt);
+  position: relative;
+  overflow: hidden;
+}
+.mm-chart::after {
+  content: "Chart renders here";
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  color: var(--mm-ink-muted);
+  font-size: .85rem;
+  letter-spacing: .04em;
+}
+.mm-chart-legend {
+  display: flex; gap: 1rem; flex-wrap: wrap;
+  font-size: .8rem; color: var(--mm-ink-soft);
+}
+.mm-legend-dot {
+  display: inline-block; width: 10px; height: 10px; border-radius: 3px;
+  margin-right: .4rem; vertical-align: -1px;
+}
+.mm-legend-dot.in  { background: var(--mm-positive); }
+.mm-legend-dot.out { background: var(--mm-negative); opacity: .85; }
+
+/* =========================================================================
+   Transactions list
+   Income vs expense uses: leading directional glyph (▲/▼ rotated arrow),
+   sign on the amount, and a thin left rail. No big color blocks.
+   ========================================================================= */
+.mm-tx {
+  list-style: none;
+  margin: 0; padding: 0;
+}
+.mm-tx li {
+  display: grid;
+  grid-template-columns: 36px 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  padding: .85rem 1rem;
+  border-top: 1px solid var(--mm-line);
+  position: relative;
+}
+.mm-tx li:first-child { border-top: 0; }
+.mm-tx li::before {
+  content: "";
+  position: absolute; left: 0; top: 14px; bottom: 14px;
+  width: 2px; border-radius: 2px;
+  background: transparent;
+}
+.mm-tx li[data-flow="in"]::before  { background: var(--mm-positive); opacity: .7; }
+.mm-tx li[data-flow="out"]::before { background: var(--mm-negative); opacity: .55; }
+
+.mm-tx__icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: var(--mm-surface-alt);
+  display: grid; place-items: center;
+  color: var(--mm-ink-soft);
+  font-size: 14px;
+  border: 1px solid var(--mm-line);
+}
+.mm-tx__meta { min-width: 0; }
+.mm-tx__title {
+  font-weight: 500; color: var(--mm-ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mm-tx__sub {
+  font-size: .8rem; color: var(--mm-ink-muted);
+  display: flex; gap: .5rem; align-items: center;
+}
+.mm-pill {
+  display: inline-flex; align-items: center;
+  font-size: .72rem; font-weight: 500;
+  padding: .12rem .55rem;
+  border-radius: 999px;
+  background: var(--mm-surface-alt);
+  color: var(--mm-ink-soft);
+  border: 1px solid var(--mm-line);
+}
+.mm-tx__amount {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: .98rem;
+  text-align: right;
+}
+.mm-tx__amount[data-flow="in"]  { color: var(--mm-positive); }
+.mm-tx__amount[data-flow="out"] { color: var(--mm-ink); }
+.mm-tx__amount[data-flow="out"]::before { content: "−"; margin-right: 1px; }
+.mm-tx__amount[data-flow="in"]::before  { content: "+"; margin-right: 1px; }
+
+/* =========================================================================
+   Categories sidecard
+   ========================================================================= */
+.mm-cat-row {
+  display: grid; grid-template-columns: 1fr auto;
+  gap: .25rem .75rem;
+  padding: .65rem 0;
+  border-top: 1px dashed var(--mm-line);
+}
+.mm-cat-row:first-child { border-top: 0; }
+.mm-cat-bar {
+  grid-column: 1 / -1;
+  height: 4px;
+  background: var(--mm-surface-alt);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.mm-cat-bar > span {
+  display: block; height: 100%;
+  background: var(--mm-accent);
+  border-radius: inherit;
+  opacity: .85;
+}
+
+/* =========================================================================
+   Responsive
+   ========================================================================= */
+@media (max-width: 992px) {
+  .mm-app { grid-template-columns: 1fr; }
+  .mm-sidebar {
+    position: static; height: auto;
+    flex-direction: row; align-items: center;
+    overflow-x: auto; gap: 1rem;
+    padding: .75rem 1rem;
+  }
+  .mm-sidebar-footer, .mm-nav-section { display: none; }
+  .mm-nav { flex-direction: row; }
+  .mm-nav a.is-active::before { display: none; }
+}
+@media (max-width: 576px) {
+  .mm-content { padding: 1rem; }
+  .mm-topbar  { padding: .75rem 1rem; }
+  .mm-stat__value { font-size: 1.4rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="mm-app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="mm-sidebar">
+    <div class="mm-brand">
+      <span class="mm-brand-mark">M</span>
+      <span>MoneyMap</span>
+    </div>
+
+    <nav class="mm-nav" aria-label="Primary">
+      <span class="mm-nav-section">Workspace</span>
+      <a href="#" class="is-active">◆ Dashboard</a>
+      <a href="#">≡ Transactions</a>
+      <a href="#">◐ Categories</a>
+      <a href="#">↗ Insights</a>
+      <a href="#">⌖ Budgets</a>
+
+      <span class="mm-nav-section">Account</span>
+      <a href="#">⚙ Settings</a>
+      <a href="#">? Help</a>
+    </nav>
+
+    <div class="mm-sidebar-footer">
+      <span class="mm-avatar">HG</span>
+      <div>
+        <div style="color:var(--mm-ink); font-weight:500; font-size:.88rem;">Hakim Ghods</div>
+        <div style="font-size:.75rem;">Personal plan</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="mm-main">
+
+    <div class="mm-topbar">
+      <div class="mm-search">
+        <input type="search" placeholder="Search transactions, categories…" />
+      </div>
+      <button class="btn btn-outline-secondary btn-sm">Import</button>
+      <button class="btn btn-primary btn-sm">+ New expense</button>
+    </div>
+
+    <div class="mm-content">
+
+      <!-- Page header -->
+      <header class="mm-page-head">
+        <div>
+          <span class="mm-eyebrow">Overview</span>
+          <h1>Good evening, Hakim.</h1>
+          <p>Here's where your money went this month.</p>
+        </div>
+        <div class="mm-segmented" role="tablist" aria-label="Time range">
+          <button>7D</button>
+          <button class="is-active">30D</button>
+          <button>90D</button>
+          <button>YTD</button>
+          <button>All</button>
+        </div>
+      </header>
+
+      <!-- Summary cards -->
+      <section class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="card mm-stat" data-flow="in">
+            <div class="mm-stat__head">
+              <span class="mm-stat__label">Income</span>
+              <span class="mm-stat__icon" aria-hidden="true">↑</span>
+            </div>
+            <div class="mm-stat__value mm-num">4,820.00</div>
+            <div class="mm-stat__delta mm-delta-up">▲ 3.4% vs. last month</div>
+            <div class="mm-spark" aria-hidden="true"></div>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="card mm-stat" data-flow="out">
+            <div class="mm-stat__head">
+              <span class="mm-stat__label">Expenses</span>
+              <span class="mm-stat__icon" aria-hidden="true">↓</span>
+            </div>
+            <div class="mm-stat__value mm-num">2,176.42</div>
+            <div class="mm-stat__delta mm-delta-down">▼ 1.8% vs. last month</div>
+            <div class="mm-spark" aria-hidden="true"></div>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="card mm-stat">
+            <div class="mm-stat__head">
+              <span class="mm-stat__label">Net flow</span>
+              <span class="mm-stat__icon" aria-hidden="true">≡</span>
+            </div>
+            <div class="mm-stat__value mm-num">+ 2,643.58</div>
+            <div class="mm-stat__delta">Saved this month</div>
+            <div class="mm-spark" aria-hidden="true"></div>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="card mm-stat">
+            <div class="mm-stat__head">
+              <span class="mm-stat__label">Budget used</span>
+              <span class="mm-stat__icon" aria-hidden="true">◐</span>
+            </div>
+            <div class="mm-stat__value mm-num">62%</div>
+            <div class="mm-stat__delta">$823 remaining of $2,200</div>
+            <div class="mm-spark" aria-hidden="true"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Chart + categories -->
+      <section class="row g-3 mb-4">
+        <div class="col-12 col-xl-8">
+          <div class="card">
+            <div class="card-body">
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <div>
+                  <span class="mm-eyebrow">Cash flow</span>
+                  <h2 class="mt-1 mb-0">Income vs. expenses</h2>
+                </div>
+                <div class="mm-chart-legend">
+                  <span><span class="mm-legend-dot in"></span>Income</span>
+                  <span><span class="mm-legend-dot out"></span>Expenses</span>
+                </div>
+              </div>
+              <div class="mm-chart" role="img" aria-label="Monthly cash flow chart placeholder"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-xl-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <div>
+                  <span class="mm-eyebrow">Top categories</span>
+                  <h2 class="mt-1 mb-0">Where it goes</h2>
+                </div>
+                <a href="#" class="small">See all</a>
+              </div>
+
+              <div class="mm-cat-row">
+                <span>Groceries</span>
+                <span class="mm-num">$642.10</span>
+                <div class="mm-cat-bar"><span style="width:78%"></span></div>
+              </div>
+              <div class="mm-cat-row">
+                <span>Dining</span>
+                <span class="mm-num">$318.55</span>
+                <div class="mm-cat-bar"><span style="width:48%"></span></div>
+              </div>
+              <div class="mm-cat-row">
+                <span>Transport</span>
+                <span class="mm-num">$214.00</span>
+                <div class="mm-cat-bar"><span style="width:32%"></span></div>
+              </div>
+              <div class="mm-cat-row">
+                <span>Subscriptions</span>
+                <span class="mm-num">$96.40</span>
+                <div class="mm-cat-bar"><span style="width:18%"></span></div>
+              </div>
+              <div class="mm-cat-row">
+                <span>Home</span>
+                <span class="mm-num">$58.20</span>
+                <div class="mm-cat-bar"><span style="width:11%"></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Recent transactions -->
+      <section class="card">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <div>
+              <span class="mm-eyebrow">Activity</span>
+              <h2 class="mt-1 mb-0">Recent transactions</h2>
+            </div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-outline-secondary btn-sm">Filter</button>
+              <a href="#" class="btn btn-outline-secondary btn-sm">View all</a>
+            </div>
+          </div>
+
+          <ul class="mm-tx">
+            <li data-flow="out">
+              <span class="mm-tx__icon" aria-hidden="true">⌂</span>
+              <div class="mm-tx__meta">
+                <div class="mm-tx__title">Whole Foods Market</div>
+                <div class="mm-tx__sub">
+                  <span class="mm-pill">Groceries</span>
+                  <span>Today · 18:42</span>
+                </div>
+              </div>
+              <div class="mm-tx__amount mm-num" data-flow="out">84.21</div>
+            </li>
+
+            <li data-flow="in">
+              <span class="mm-tx__icon" aria-hidden="true">⇣</span>
+              <div class="mm-tx__meta">
+                <div class="mm-tx__title">Salary — Auxalia</div>
+                <div class="mm-tx__sub">
+                  <span class="mm-pill">Income</span>
+                  <span>May 1</span>
+                </div>
+              </div>
+              <div class="mm-tx__amount mm-num" data-flow="in">4,820.00</div>
+            </li>
+
+            <li data-flow="out">
+              <span class="mm-tx__icon" aria-hidden="true">☕</span>
+              <div class="mm-tx__meta">
+                <div class="mm-tx__title">Blue Bottle Coffee</div>
+                <div class="mm-tx__sub">
+                  <span class="mm-pill">Dining</span>
+                  <span>Yesterday · 09:14</span>
+                </div>
+              </div>
+              <div class="mm-tx__amount mm-num" data-flow="out">6.75</div>
+            </li>
+
+            <li data-flow="out">
+              <span class="mm-tx__icon" aria-hidden="true">▶</span>
+              <div class="mm-tx__meta">
+                <div class="mm-tx__title">Netflix</div>
+                <div class="mm-tx__sub">
+                  <span class="mm-pill">Subscriptions</span>
+                  <span>May 6</span>
+                </div>
+              </div>
+              <div class="mm-tx__amount mm-num" data-flow="out">15.99</div>
+            </li>
+
+            <li data-flow="out">
+              <span class="mm-tx__icon" aria-hidden="true">⛟</span>
+              <div class="mm-tx__meta">
+                <div class="mm-tx__title">Shell — Fuel</div>
+                <div class="mm-tx__sub">
+                  <span class="mm-pill">Transport</span>
+                  <span>May 5</span>
+                </div>
+              </div>
+              <div class="mm-tx__amount mm-num" data-flow="out">52.10</div>
+            </li>
+
+            <li data-flow="in">
+              <span class="mm-tx__icon" aria-hidden="true">↺</span>
+              <div class="mm-tx__meta">
+                <div class="mm-tx__title">Refund — Amazon</div>
+                <div class="mm-tx__sub">
+                  <span class="mm-pill">Refund</span>
+                  <span>May 3</span>
+                </div>
+              </div>
+              <div class="mm-tx__amount mm-num" data-flow="in">29.40</div>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<script src="../src/MoneyMap.Web/wwwroot/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
