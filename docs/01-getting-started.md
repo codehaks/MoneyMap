@@ -25,18 +25,15 @@ Read this first if you have never built or run MoneyMap locally. It is the short
 
 ## Configure the database
 
-Edit `src/MoneyMap.Web/appsettings.Development.json` (preferred) or override with the env var
-`ConnectionStrings__DefaultConnection`:
+Connection strings are **not** committed to source control. Use user-secrets in development:
 
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Port=5432;Database=moneymapdb1;Username=postgres;Password=changeme"
-  }
-}
+```bash
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" \
+  "Host=localhost;Port=5432;Database=moneymapdb1;Username=postgres;Password=changeme" \
+  --project src/MoneyMap.Web
 ```
 
-The committed `appsettings.json` contains a development-only password. **Do not deploy with that file unchanged.** See `04-authentication-and-authorization.md` and `06-known-issues-and-improvement-backlog.md`.
+Or override at runtime with the environment variable `ConnectionStrings__DefaultConnection`. In production, use a vault or platform-managed secret store.
 
 ## First-run sequence
 

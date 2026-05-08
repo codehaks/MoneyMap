@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using MoneyMap.Application;
+using MoneyMap.Core;
+using MoneyMap.Core.DataModels;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
@@ -12,77 +14,58 @@ namespace MoneyMap.Web.Areas.Users.Pages.Expenses;
 public class CreateModel : PageModel
 {
     private readonly IExpenseService _expenseService;
+
     public CreateModel(IExpenseService expenseService)
     {
         _expenseService = expenseService;
     }
 
     [BindNever]
-    public SelectList CategorySelectList { get; set; }
+    public SelectList CategorySelectList { get; private set; } = new(Array.Empty<ExpenseCategory>(), nameof(ExpenseCategory.Id), nameof(ExpenseCategory.Name));
 
     public int CategoryId { get; set; }
 
     [Required]
     [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than 0")]
-    public decimal Amount { get; set; } // cents
+    public decimal Amount { get; set; }
 
     public DateTime Date { get; set; } = DateTime.UtcNow;
 
     [Required]
-    [StringLength(100)]
-    [MinLength(1)]
-    public string Note { get; set; } = default!;
+    [StringLength(Expense.MaxNoteLength, MinimumLength = 1)]
+    public string Note { get; set; } = string.Empty;
 
-    public void OnGet()
+    public async Task OnGetAsync(CancellationToken ct)
     {
-        var categories = _expenseService.GetCategories();
-        CategorySelectList = new SelectList(categories, "Id", "Name");
+        await PopulateCategoriesAsync(ct);
     }
 
-    public IActionResult OnPost()
+    public async Task<IActionResult> OnPostAsync(CancellationToken ct)
     {
-
-        if (Date < DateTime.Now.AddYears(-1))
-        {
-            ModelState.AddModelError("Date", "Too old!");
-            ModelState.AddModelError("", "Can not add new expense!");
-
-            var categories = _expenseService.GetCategories();
-            CategorySelectList = new SelectList(categories, "Id", "Name");
-            return Page();
-        }
-        else if (Date.Date > DateTime.UtcNow.Date)
-        {
-            ModelState.AddModelError("Date", "Can not be in future!");
-
-            var categories = _expenseService.GetCategories();
-            CategorySelectList = new SelectList(categories, "Id", "Name");
-            return Page();
-        }
-
         if (!ModelState.IsValid)
         {
-            var categories = _expenseService.GetCategories();
-            CategorySelectList = new SelectList(categories, "Id", "Name");
+            await PopulateCategoriesAsync(ct);
             return Page();
         }
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var userName = User.FindFirstValue(ClaimTypes.Name);
-
-        _expenseService.Create(userId, new MoneyMap.Core.DataModels.Expense
+        try
         {
-            CategoryId = CategoryId,
-            Amount = Amount,
-            Date = Date.ToUniversalTime(), //DateTime.UtcNow,
-            Note = Note,
-            UserId = userId,
-            UserName = userName!
-        });
+            await _expenseService.CreateAsync(userId, Amount, Date.ToUniversalTime(), CategoryId, Note, ct);
+        }
+        catch (DomainException ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
+            await PopulateCategoriesAsync(ct);
+            return Page();
+        }
 
-        // redirect to Index page
         return RedirectToPage("Index");
     }
 
-
+    private async Task PopulateCategoriesAsync(CancellationToken ct)
+    {
+        var categories = await _expenseService.GetCategoriesAsync(ct);
+        CategorySelectList = new SelectList(categories, nameof(ExpenseCategory.Id), nameof(ExpenseCategory.Name));
+    }
 }

@@ -54,30 +54,23 @@ builder.Services.AddRazorPages().AddRazorPagesOptions(options =>
 ## The `RequireAdminRole` policy
 
 ```csharp
-options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("admin"));
+options.AddPolicy(AuthorizationPolicies.RequireAdmin, policy => policy.RequireRole(Roles.Admin));
 ```
 
-The role name is lowercase `"admin"`. Identity role names are case-sensitive in lookups by default; create the role with the exact same casing.
+Role and policy names are constants in `MoneyMap.Application.Authorization` (`Roles.Admin = "admin"`, `AuthorizationPolicies.RequireAdmin = "RequireAdmin"`). The role is seeded automatically by `Program.cs` on startup if missing — there is no manual SQL step required.
 
 ## Promoting a user to admin
 
-There is no UI for role assignment. To create the first admin:
+The `admin` role is created automatically by the role seeder in `Program.cs`. To assign it to a user, run:
 
 ```sql
--- after the user has registered
-INSERT INTO "AspNetRoles" ("Id", "Name", "NormalizedName", "ConcurrencyStamp")
-VALUES (gen_random_uuid()::text, 'admin', 'ADMIN', gen_random_uuid()::text)
-ON CONFLICT DO NOTHING;
-
 INSERT INTO "AspNetUserRoles" ("UserId", "RoleId")
 SELECT u."Id", r."Id"
   FROM "AspNetUsers" u, "AspNetRoles" r
  WHERE u."Email" = 'you@example.com' AND r."Name" = 'admin';
 ```
 
-The user must sign out and sign back in for the new role claim to appear in their cookie.
-
-A cleaner approach (a seeded admin or an admin-bootstrap page) is on the backlog — see `06-known-issues-and-improvement-backlog.md`.
+The user must sign out and sign back in for the new role claim to appear in their cookie. A self-service UI is still on the backlog.
 
 ## Per-row authorization (the second line of defense)
 

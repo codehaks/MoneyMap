@@ -8,12 +8,11 @@ PostgreSQL database, schema managed exclusively by EF Core migrations. There are
 | Column | Type | Notes |
 | ------ | ---- | ----- |
 | `Id` | `int` PK | Identity, auto-increment. |
-| `Amount` | `decimal` | No precision specified — relies on Npgsql defaults. See improvement note in `06`. |
-| `Date` | `timestamp with time zone` | Stored UTC; `Create.cshtml.cs` calls `Date.ToUniversalTime()`. |
-| `Note` | `text` | Required, ≤100 chars (enforced at PageModel level only). |
-| `CategoryId` | `int` FK → `ExpenseCategories.Id` | Eager-loaded by `GetAll` via `Include("Category")`. |
-| `UserId` | `string` | Identity user id — used for **all** access control filtering. |
-| `UserName` | `string` | Denormalized snapshot of the user's display name. |
+| `Amount` | `numeric(18,2)` | Precision configured in `ExpenseConfiguration`. |
+| `Date` | `timestamp with time zone` | Stored UTC; PageModels call `Date.ToUniversalTime()` on save. |
+| `Note` | `varchar(100)` `NOT NULL` | Length enforced at the database (and inside the entity). |
+| `CategoryId` | `int` FK → `ExpenseCategories.Id` | `OnDelete: Restrict`. Eager-loaded via typed `Include(e => e.Category)`. |
+| `UserId` | `text` `NOT NULL` | Identity user id — used for **all** access control filtering. Indexed; composite `(UserId, Date)` index also exists. |
 
 ### `ExpenseCategories`
 | Column | Type | Notes |
@@ -21,7 +20,7 @@ PostgreSQL database, schema managed exclusively by EF Core migrations. There are
 | `Id` | `int` PK | Seeded values are 1–8. |
 | `Name` | `string` | Unique by convention only — no DB unique index. |
 
-Eight categories are seeded in `MoneyMapDbContext.OnModelCreating`: Groceries, Rent, Utilities, Transportation, Entertainment, Health, Insurance, Other. Modifying that list **requires a new migration** — EF emits seed data through migrations, not at runtime.
+Eight categories are seeded in `ExpenseCategoryConfiguration.HasData(...)`: Groceries, Rent, Utilities, Transportation, Entertainment, Health, Insurance, Other. Modifying that list **requires a new migration** — EF emits seed data through migrations, not at runtime.
 
 ### Identity tables
 Standard ASP.NET Core Identity tables (`AspNetUsers`, `AspNetRoles`, `AspNetUserRoles`, `AspNetUserClaims`, etc.) created by `IdentityDbContext<ApplicationUser>`. `ApplicationUser` currently adds no extra columns; commented-out `FirstName`/`LastName` exist as placeholders.
@@ -52,12 +51,9 @@ dotnet ef database update --project src/MoneyMap --startup-project src/MoneyMap.
 
 The DbContext is defined in `MoneyMap`, so EF's design-time tooling expects migration assemblies to live alongside it. The `--startup-project` flag points the tool at `MoneyMap.Web` only so it can read the connection string from `appsettings.json` and resolve the configured `DbContextOptions`. Don't move the migrations folder.
 
-## Seed / fixture data
-
-`src/MoneyMap.Web/data.sql` exists as an ad-hoc seed script (raw SQL, run manually). It is **not** wired into application startup. If you change the schema, update or regenerate this file accordingly.
-
 ## Querying patterns to follow
 
-- All queries that return a single user's data **must** filter by `UserId` inside the service. See `ExpenseService.FindById`, `GetAll`, `Update`, `Remove`.
-- Use `Include("Category")` (or `Include(e => e.Category)`) when the page needs the category name; nothing in EF will lazy-load.
-- Prefer `EF.Functions.Like` over `string.Contains` for case-insensitive search — the existing search uses lowercased `LIKE` because `string.Contains(StringComparison.OrdinalIgnoreCase)` does not translate to SQL.
+- All queries that return a single user's data **must** filter by `UserId` inside the service. See `ExpenseService.FindByIdAsync`, `GetAllAsync`, `UpdateAsync`, `RemoveAsync`.
+- Use typed `Include(e => e.Category)` when the page needs the category name; nothing in EF will lazy-load.
+- Prefer `EF.Functions.Like` over `string.Contains` for case-insensitive search — `string.Contains(StringComparison.OrdinalIgnoreCase)` does not translate to SQL.
+- All service methods are `async` and accept a `CancellationToken`. Pass the token from the page handler.

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet --version)",
+      "Bash(dotnet ef *)",
+      "Bash(dotnet build *)"
+    ]
+  }
+}

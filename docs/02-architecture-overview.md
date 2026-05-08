@@ -29,22 +29,23 @@ Pure C# domain entities — `Expense` and `ExpenseCategory`. No EF attributes, n
 `Expense` carries **both** `UserId` (the FK to Identity user) and a denormalized `UserName`. Both must be populated when creating an expense (see `Create.cshtml.cs`). Treat `UserId` as the source of truth; `UserName` is a snapshot for display.
 
 ### Application (`MoneyMap.Application`)
-Service interfaces (`IExpenseService`, `ICalendarService`, `IUserService`) and their implementations under `Application/Services/`. This is where business rules live. Services receive `MoneyMapDbContext` or `UserManager<ApplicationUser>` via constructor injection.
+Service interfaces (`IExpenseService`, `IUserService`) and their implementations under `Application/Services/`. `Application/Authorization/` holds the `Roles` and `AuthorizationPolicies` constants. Services receive `MoneyMapDbContext` or `UserManager<ApplicationUser>` via constructor injection. All I/O methods are async and accept a `CancellationToken`.
 
 Important contract for `IExpenseService`: every method that touches a single user's data takes a `userId` parameter and filters by it inside the implementation. **Do not bypass this** — it is the only thing preventing one user from reading or mutating another user's expenses (see `04-authentication-and-authorization.md`).
 
 ### Infrastructure (`MoneyMap.Infrastructure`)
-`MoneyMapDbContext : IdentityDbContext<ApplicationUser>` and `ApplicationUser : IdentityUser`. The DbContext owns the `Expenses` and `ExpenseCategories` DbSets and seeds the eight default categories via `HasData`. Adding new tables means adding a `DbSet<>` here and producing a migration.
+`MoneyMapDbContext : IdentityDbContext<ApplicationUser>` and `ApplicationUser : IdentityUser`. The DbContext exposes the `Expenses` and `ExpenseCategories` DbSets; per-entity configuration lives in `IEntityTypeConfiguration<>` classes under `Configurations/` and is wired up via `ApplyConfigurationsFromAssembly`. Category seeds live in `ExpenseCategoryConfiguration`. Adding a new table means: new entity → new `IEntityTypeConfiguration<>` → new `DbSet<>` → migration.
 
 ### Web (`MoneyMap.Web`)
 `Program.cs` is the only composition root. It:
 1. Registers `MoneyMapDbContext` with the Npgsql provider.
 2. Registers ASP.NET Core Identity (`ApplicationUser` + `IdentityRole`) with default UI, EF stores, default token providers; lockout after 3 failed attempts for 10 minutes.
-3. Defines a single authorization policy: `RequireAdminRole` (requires the `admin` role).
+3. Defines the `RequireAdmin` policy (requires `Roles.Admin`).
 4. Adds Razor Pages with **folder-level** authorization conventions:
    - `Areas/Users/**` requires authentication.
    - `Areas/Admin/**` requires the `admin` role.
-5. Registers all three application services as **transient**.
+5. Registers application services as **transient**.
+6. Seeds the `admin` role on startup if missing.
 
 Pages organized by Area:
 - `Areas/Users/Pages/Expenses/{Index,Create,Edit}.cshtml` — per-user expense CRUD (no dedicated `Delete` page; deletion is wired through Index).
@@ -73,5 +74,6 @@ Identity (login/logout/register) bypasses the application services entirely — 
 
 - **DI lifetime:** `MoneyMapDbContext` is scoped (default for `AddDbContext`), services are transient. Don't hold references to entities or the DbContext across requests.
 - **Logging:** `ILogger<T>` is the only logging mechanism (see `ExpenseService` for the pattern). Default level is `Information`; ASP.NET Core is suppressed to `Warning` in `appsettings.json`.
-- **Static assets:** Web uses `MapStaticAssets()` and `UseStaticWebAssets()` — keep new client assets under `wwwroot/`.
-- **No background workers, no message bus, no caching layer.** All work is synchronous-on-request against the DB.
+- **Static assets:** Web uses `MapStaticAssets()` plus `UseStaticFiles()` — keep new client assets under `wwwroot/`.
+- **Async I/O:** services and PageModel handlers are async with `CancellationToken` propagation.
+- **No background workers, no message bus, no caching layer.**

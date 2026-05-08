@@ -59,7 +59,7 @@ namespace MoneyMap.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false)
+                    Name = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -178,12 +178,11 @@ namespace MoneyMap.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Amount = table.Column<decimal>(type: "numeric", nullable: false),
+                    Amount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
                     Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Note = table.Column<string>(type: "text", nullable: false),
+                    Note = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     CategoryId = table.Column<int>(type: "integer", nullable: false),
-                    UserId = table.Column<string>(type: "text", nullable: false),
-                    UserName = table.Column<string>(type: "text", nullable: false)
+                    UserId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -193,7 +192,7 @@ namespace MoneyMap.Migrations
                         column: x => x.CategoryId,
                         principalTable: "ExpenseCategories",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.InsertData(
@@ -249,9 +248,25 @@ namespace MoneyMap.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_ExpenseCategories_Name",
+                table: "ExpenseCategories",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Expenses_CategoryId",
                 table: "Expenses",
                 column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Expenses_UserId",
+                table: "Expenses",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Expenses_UserId_Date",
+                table: "Expenses",
+                columns: new[] { "UserId", "Date" });
         }
 
         /// <inheritdoc />

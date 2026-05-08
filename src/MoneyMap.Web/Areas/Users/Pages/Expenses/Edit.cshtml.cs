@@ -1,9 +1,10 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using MoneyMap.Application;
+using MoneyMap.Core;
+using MoneyMap.Core.DataModels;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
@@ -13,38 +14,33 @@ namespace MoneyMap.Web.Areas.Users.Pages.Expenses;
 public class EditModel : PageModel
 {
     private readonly IExpenseService _expenseService;
+
     public EditModel(IExpenseService expenseService)
     {
         _expenseService = expenseService;
     }
 
     [BindNever]
-    public SelectList CategorySelectList { get; set; }
-
-    public int CategoryId { get; set; }
+    public SelectList CategorySelectList { get; private set; } = new(Array.Empty<ExpenseCategory>(), nameof(ExpenseCategory.Id), nameof(ExpenseCategory.Name));
 
     public int Id { get; set; }
+    public int CategoryId { get; set; }
 
     [Required]
     [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than 0")]
-    public decimal Amount { get; set; } // cents
+    public decimal Amount { get; set; }
 
     public DateTime Date { get; set; } = DateTime.UtcNow;
 
     [Required]
-    [StringLength(100)]
-    [MinLength(1)]
-    public string Note { get; set; } = default!;
+    [StringLength(Expense.MaxNoteLength, MinimumLength = 1)]
+    public string Note { get; set; } = string.Empty;
 
-    public IActionResult OnGet(int id)
+    public async Task<IActionResult> OnGetAsync(int id, CancellationToken ct)
     {
-        var categories = _expenseService.GetCategories();
-        CategorySelectList = new SelectList(categories, "Id", "Name");
-
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var expense = _expenseService.FindById(userId, id);
-
-        if (expense == null)
+        var expense = await _expenseService.FindByIdAsync(userId, id, ct);
+        if (expense is null)
         {
             return NotFound();
         }
@@ -55,52 +51,40 @@ public class EditModel : PageModel
         Date = expense.Date;
         Note = expense.Note;
 
+        await PopulateCategoriesAsync(ct);
         return Page();
     }
 
-    public IActionResult OnPost()
+    public async Task<IActionResult> OnPostAsync(CancellationToken ct)
     {
-
-        if (Date < DateTime.Now.AddYears(-1))
-        {
-            ModelState.AddModelError("Date", "Too old!");
-            ModelState.AddModelError("", "Can not add new expense!");
-
-            var categories = _expenseService.GetCategories();
-            CategorySelectList = new SelectList(categories, "Id", "Name");
-            return Page();
-        }
-        else if (Date.Date > DateTime.UtcNow.Date)
-        {
-            ModelState.AddModelError("Date", "Can not be in future!");
-
-            var categories = _expenseService.GetCategories();
-            CategorySelectList = new SelectList(categories, "Id", "Name");
-            return Page();
-        }
-
         if (!ModelState.IsValid)
         {
-            var categories = _expenseService.GetCategories();
-            CategorySelectList = new SelectList(categories, "Id", "Name");
+            await PopulateCategoriesAsync(ct);
             return Page();
         }
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var userName = User.FindFirstValue(ClaimTypes.Name);
-
-        _expenseService.Update(userId, new MoneyMap.Core.DataModels.Expense
+        try
         {
-            Id = Id,
-            CategoryId = CategoryId,
-            Amount = Amount,
-            Date = Date.ToUniversalTime(), //DateTime.UtcNow,
-            Note = Note,
-            UserId = userId,
-            UserName = userName!
-        });
+            var updated = await _expenseService.UpdateAsync(userId, Id, Amount, Date.ToUniversalTime(), CategoryId, Note, ct);
+            if (!updated)
+            {
+                return NotFound();
+            }
+        }
+        catch (DomainException ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
+            await PopulateCategoriesAsync(ct);
+            return Page();
+        }
 
-        // redirect to Index page
         return RedirectToPage("Index");
+    }
+
+    private async Task PopulateCategoriesAsync(CancellationToken ct)
+    {
+        var categories = await _expenseService.GetCategoriesAsync(ct);
+        CategorySelectList = new SelectList(categories, nameof(ExpenseCategory.Id), nameof(ExpenseCategory.Name));
     }
 }

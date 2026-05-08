@@ -113,23 +113,20 @@
     </div>
 </section>
 
-@if (Model.IsNewYear)
-{
-    <div class="bg-light py-4">
-        <div class="container text-center">
-            <div class="alert alert-primary d-inline-block shadow-sm">
-                <h6 class="mb-2">🎉 New Year Countdown</h6>
-                <p class="mb-0">
-                    <strong>@Model.DaysLeft</strong> days left until 2026
-                    @if (Model.DaysLeft < 11)
-                    {
-                        <span class="text-danger ms-2">⏰ Time is running out!</span>
-                    }
-                </p>
-            </div>
+<div class="bg-light py-4">
+    <div class="container text-center">
+        <div class="alert alert-primary d-inline-block shadow-sm">
+            <h6 class="mb-2">New Year Countdown</h6>
+            <p class="mb-0">
+                <strong>@Model.DaysLeft</strong> days left until @Model.NextYear
+                @if (Model.DaysLeft < 11)
+                {
+                    <span class="text-danger ms-2">Time is running out!</span>
+                }
+            </p>
         </div>
     </div>
-}
+</div>
 
 
 

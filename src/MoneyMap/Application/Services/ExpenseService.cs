@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MoneyMap.Core.DataModels;
 using MoneyMap.Infrastructure.Data;
-using Microsoft.Extensions.Logging;
 
 namespace MoneyMap.Application.Services;
+
 public class ExpenseService : IExpenseService
 {
     private readonly MoneyMapDbContext _db;
@@ -15,74 +16,69 @@ public class ExpenseService : IExpenseService
         _logger = logger;
     }
 
-    public void Create(string userId, Expense expense)
+    public async Task<IReadOnlyList<Expense>> GetAllAsync(string userId, string? searchTerm, int? categoryId, CancellationToken ct = default)
     {
-        _db.Add(expense);
-        _db.SaveChanges();
-    }
+        var query = _db.Expenses
+            .Include(e => e.Category)
+            .Where(e => e.UserId == userId);
 
-    public Expense? FindById(string userId, int id)
-    {
-        _logger.LogDebug("Finding expense by id: {ExpenseId} for user: {UserId}", id, userId);
-        var expense = _db.Expenses.FirstOrDefault(e => e.Id == id && e.UserId == userId);
-        if (expense == null)
+        if (!string.IsNullOrWhiteSpace(searchTerm))
         {
-            _logger.LogDebug("Expense with id {ExpenseId} not found for user {UserId}.", id, userId);
-        }
-        else
-        {
-            _logger.LogDebug("Expense with id {ExpenseId} found for user {UserId}.", id, userId);
-        }
-        return expense;
-    }
-
-    public IList<Expense> GetAll(string userId, string? searchTerm, int? categoryId)
-    {
-        var query = _db.Expenses.Include("Category").Where(e => e.UserId == userId);
-        
-        if (!string.IsNullOrEmpty(searchTerm))
-        {
-            query = query
-               // .Where(e => e.Note.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
-               .Where(e => EF.Functions.Like(e.Note.ToLower(), $"%{searchTerm.ToLower()}%"));
-
+            var pattern = $"%{searchTerm.ToLower()}%";
+            query = query.Where(e => EF.Functions.Like(e.Note.ToLower(), pattern));
         }
 
         if (categoryId is not null)
         {
-            query = query
-                .Where(e => e.CategoryId==categoryId);
+            query = query.Where(e => e.CategoryId == categoryId);
         }
-        return query.ToList();
+
+        return await query.OrderByDescending(e => e.Date).ToListAsync(ct);
     }
 
-    public void Remove(string userId, int id)
+    public async Task CreateAsync(string userId, decimal amount, DateTime dateUtc, int categoryId, string note, CancellationToken ct = default)
     {
-        var expense = _db.Expenses.FirstOrDefault(e => e.Id == id && e.UserId == userId);
-        if (expense != null)
+        var expense = Expense.Create(userId, amount, dateUtc, categoryId, note);
+        _db.Expenses.Add(expense);
+        await _db.SaveChangesAsync(ct);
+        _logger.LogInformation("Created expense {ExpenseId} for user {UserId}.", expense.Id, userId);
+    }
+
+    public Task<Expense?> FindByIdAsync(string userId, int id, CancellationToken ct = default) =>
+        _db.Expenses
+           .Include(e => e.Category)
+           .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId, ct);
+
+    public async Task<bool> UpdateAsync(string userId, int id, decimal amount, DateTime dateUtc, int categoryId, string note, CancellationToken ct = default)
+    {
+        var existing = await _db.Expenses.FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId, ct);
+        if (existing is null)
         {
-            _db.Expenses.Remove(expense);
-            _db.SaveChanges();
+            _logger.LogWarning("Update skipped: expense {ExpenseId} not found for user {UserId}.", id, userId);
+            return false;
         }
+
+        existing.Modify(amount, dateUtc, categoryId, note);
+        await _db.SaveChangesAsync(ct);
+        _logger.LogInformation("Updated expense {ExpenseId} for user {UserId}.", id, userId);
+        return true;
     }
 
-    public void Update(string userId, Expense expense)
+    public async Task<bool> RemoveAsync(string userId, int id, CancellationToken ct = default)
     {
-        var oldExpense = _db.Expenses.FirstOrDefault(e => e.Id == expense.Id && e.UserId == userId);
-
-        if (oldExpense != null)
+        var existing = await _db.Expenses.FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId, ct);
+        if (existing is null)
         {
-            oldExpense.Amount = expense.Amount;
-            oldExpense.Note = expense.Note;
-            oldExpense.Date = expense.Date;
-            oldExpense.CategoryId = expense.CategoryId;
+            _logger.LogWarning("Remove skipped: expense {ExpenseId} not found for user {UserId}.", id, userId);
+            return false;
         }
 
-        _db.SaveChanges();
+        _db.Expenses.Remove(existing);
+        await _db.SaveChangesAsync(ct);
+        _logger.LogInformation("Removed expense {ExpenseId} for user {UserId}.", id, userId);
+        return true;
     }
 
-    public List<ExpenseCategory> GetCategories()
-    {
-        return _db.ExpenseCategories.ToList();
-    }
+    public async Task<IReadOnlyList<ExpenseCategory>> GetCategoriesAsync(CancellationToken ct = default) =>
+        await _db.ExpenseCategories.OrderBy(c => c.Name).ToListAsync(ct);
 }

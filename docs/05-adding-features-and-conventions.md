@@ -10,9 +10,7 @@ A feature that adds a new user-owned entity (say, "Budget") touches every layer:
    - POCO with public auto-properties, no EF attributes.
    - Include `UserId` (string) and any denormalized display fields needed.
 
-2. **DbSet** — `src/MoneyMap/Infrastructure/Data/MoneyMapDbContext.cs`
-   - `public DbSet<Budget> Budgets { get; set; }`
-   - Add seed data in `OnModelCreating` only if it ships with the product.
+2. **DbSet + IEntityTypeConfiguration** — add `public DbSet<Budget> Budgets => Set<Budget>();` to `MoneyMapDbContext`, and a new class `Infrastructure/Data/Configurations/BudgetConfiguration.cs : IEntityTypeConfiguration<Budget>` for indexes, lengths, precision, and any seed data. `ApplyConfigurationsFromAssembly` picks it up automatically.
 
 3. **Migration** — see `03-data-model-and-migrations.md`. Always inspect the generated migration before applying.
 
@@ -22,7 +20,8 @@ A feature that adds a new user-owned entity (say, "Budget") touches every layer:
 
 5. **Service implementation** — `src/MoneyMap/Application/Services/BudgetService.cs`
    - Inject `MoneyMapDbContext` and `ILogger<BudgetService>`.
-   - Filter every query by `UserId`. Never call `_db.Budgets.ToList()` without a `Where(b => b.UserId == userId)`.
+   - All methods are `async` and accept `CancellationToken ct = default`.
+   - Filter every query by `UserId`. Never call `_db.Budgets.ToListAsync()` without a `Where(b => b.UserId == userId)`.
 
 6. **DI registration** — `src/MoneyMap.Web/Program.cs`
    - `builder.Services.AddTransient<IBudgetService, BudgetService>();`
@@ -51,7 +50,7 @@ Look at `Areas/Users/Pages/Expenses/Create.cshtml.cs` as the canonical example:
 
 - **Namespaces** mirror folder structure (`MoneyMap.Application.Services`, `MoneyMap.Web.Areas.Users.Pages.Expenses`). File-scoped namespaces are used in newer files.
 - **Nullability:** the projects do not currently have `<Nullable>enable</Nullable>` set globally. Properties that are required-but-EF-managed use `= default!;` to silence init warnings. Match what surrounding files do; don't enable nullable annotations file-by-file.
-- **Async vs sync:** existing services are synchronous (`Create`, `GetAll`, `Update`, `Remove`). `CalendarService` exposes `*Async` wrappers that just `Task.FromResult` — they are not real async. New services that perform I/O should ideally be async-first (`async Task<T>`), but expect to also update the PageModel call sites. Mixing async and sync handlers is fine within Razor Pages.
+- **Async I/O everywhere.** All service methods are `async Task<T>` and accept `CancellationToken`. Page handlers are `OnGetAsync` / `OnPostAsync`. Do not introduce sync wrappers around async work.
 - **Logging:** inject `ILogger<T>` and use structured templates with named placeholders (`"... {ExpenseId} for user {UserId}"`). Avoid string interpolation in log messages.
 - **Magic strings:** avoid hardcoding role names outside of `Program.cs`. If you find yourself typing `"admin"` again, introduce a constant.
 

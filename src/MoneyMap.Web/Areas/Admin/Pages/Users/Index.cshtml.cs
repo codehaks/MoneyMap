@@ -1,23 +1,22 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using MoneyMap.Application;
+using MoneyMap.Infrastructure.Data;
 
-namespace MoneyMap.Web.Areas.Admin.Pages.Users
+namespace MoneyMap.Web.Areas.Admin.Pages.Users;
+
+public class IndexModel : PageModel
 {
-    public class IndexModel : PageModel
+    private readonly IUserService _userService;
+
+    public IndexModel(IUserService userService)
     {
-        private readonly IUserService _userService;
+        _userService = userService;
+    }
 
-        public IndexModel(IUserService userService)
-        {
-            _userService = userService;
-        }
+    public IReadOnlyList<ApplicationUser> Users { get; private set; } = Array.Empty<ApplicationUser>();
 
-        public List<ApplicationUser> Users { get; set; }
-
-        public void OnGet()
-        {
-            Users = _userService.GetAll();
-        }
+    public async Task OnGetAsync(CancellationToken ct)
+    {
+        Users = await _userService.GetAllAsync(ct);
     }
 }

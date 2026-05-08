@@ -163,7 +163,8 @@ namespace MoneyMap.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("numeric");
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<int>("CategoryId")
                         .HasColumnType("integer");
@@ -173,19 +174,20 @@ namespace MoneyMap.Migrations
 
                     b.Property<string>("Note")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UserName")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId", "Date");
 
                     b.ToTable("Expenses");
                 });
@@ -200,9 +202,13 @@ namespace MoneyMap.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("ExpenseCategories");
 
@@ -369,7 +375,7 @@ namespace MoneyMap.Migrations
                     b.HasOne("MoneyMap.Core.DataModels.ExpenseCategory", "Category")
                         .WithMany("Expenses")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Category");

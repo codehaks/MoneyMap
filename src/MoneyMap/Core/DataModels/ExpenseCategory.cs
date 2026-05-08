@@ -1,4 +1,4 @@
-﻿namespace MoneyMap.Core.DataModels;
+namespace MoneyMap.Core.DataModels;
 
 public class ExpenseCategory
 {

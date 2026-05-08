@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using MoneyMap.Application;
@@ -8,10 +7,6 @@ namespace MoneyMap.Web.Areas.Admin.Pages.Users;
 
 public class DetailsModel : PageModel
 {
-    public IList<string> Roles { get; set; } = new List<string>();
-    public ApplicationUser? UserDetails { get; set; }
-    public string UserId { get; set; } = string.Empty;
-
     private readonly IUserService _userService;
 
     public DetailsModel(IUserService userService)
@@ -19,11 +14,19 @@ public class DetailsModel : PageModel
         _userService = userService;
     }
 
-    public async Task<PageResult> OnGet(string id)
+    public IList<string> Roles { get; private set; } = new List<string>();
+    public ApplicationUser? UserDetails { get; private set; }
+    public string UserId { get; private set; } = string.Empty;
+
+    public async Task<IActionResult> OnGetAsync(string id, CancellationToken ct)
     {
         UserId = id;
-        Roles = await _userService.GetRoles(id);
-        UserDetails = _userService.GetAll().FirstOrDefault(u => u.Id == id);
+        UserDetails = await _userService.FindByIdAsync(id, ct);
+        if (UserDetails is null)
+        {
+            return NotFound();
+        }
+        Roles = await _userService.GetRolesAsync(id, ct);
         return Page();
     }
 }
