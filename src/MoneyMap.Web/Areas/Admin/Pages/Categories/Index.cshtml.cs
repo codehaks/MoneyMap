@@ -1,12 +1,22 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using MoneyMap.Application;
+using MoneyMap.Core.DataModels;
 
-namespace MoneyMap.Web.Areas.Admin.Pages.Categories
+namespace MoneyMap.Web.Areas.Admin.Pages.Categories;
+
+public class IndexModel : PageModel
 {
-    public class IndexModel : PageModel
+    private readonly IExpenseService _expenseService;
+
+    public IndexModel(IExpenseService expenseService)
     {
-        public void OnGet()
-        {
-        }
+        _expenseService = expenseService;
+    }
+
+    public IReadOnlyList<ExpenseCategory> Categories { get; private set; } = Array.Empty<ExpenseCategory>();
+
+    public async Task OnGetAsync(CancellationToken ct)
+    {
+        Categories = await _expenseService.GetCategoriesAsync(ct);
     }
 }

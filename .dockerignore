@@ -22,7 +22,13 @@
 **/secrets.dev.yaml
 **/values.dev.yaml
 LICENSE
+LICENSE.txt
 README.md
+docs
+**/appsettings.Development.json
+**/appsettings.Local.json
+**/secrets.json
+**/*.user
 !**/.gitignore
 !.git/HEAD
 !.git/config

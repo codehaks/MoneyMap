@@ -56,7 +56,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var expense in Model.ExpenseList)
+            @foreach (var expense in Model.Expenses)
             {
                 <tr>
                     <td>@expense.Note</td>
@@ -86,7 +86,7 @@
     </table>
 </div>
 
-@if (!Model.ExpenseList.Any())
+@if (Model.Expenses.Count == 0)
 {
     <div class="text-center py-5">
         <i class="fas fa-receipt text-muted mb-3" style="font-size: 64px;"></i>

@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -9,7 +8,6 @@ using System.Security.Claims;
 
 namespace MoneyMap.Web.Areas.Users.Pages.Expenses;
 
-[Authorize]
 public class IndexModel : PageModel
 {
     private readonly IExpenseService _expenseService;
@@ -19,35 +17,36 @@ public class IndexModel : PageModel
         _expenseService = expenseService;
     }
 
-    public IList<Expense> ExpenseList { get; set; }
+    public IReadOnlyList<Expense> Expenses { get; private set; } = Array.Empty<Expense>();
 
     [BindProperty(SupportsGet = true)]
     public string? SearchTerm { get; set; }
 
-    [BindNever]
-    public SelectList CategorySelectList { get; set; }
-
     [BindProperty(SupportsGet = true)]
     public int? CategoryId { get; set; }
 
-    public void OnGet()
-    {
-        var categories = _expenseService.GetCategories();
-        CategorySelectList = new SelectList(categories, "Id", "Name");
-
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var expenses = _expenseService.GetAll(userId, SearchTerm, CategoryId);
-        ExpenseList = expenses;
-    }
+    [BindNever]
+    public SelectList CategorySelectList { get; private set; } = new(Array.Empty<ExpenseCategory>(), nameof(ExpenseCategory.Id), nameof(ExpenseCategory.Name));
 
     [BindProperty]
     public int Id { get; set; }
 
-    public IActionResult OnPostDelete()
+    public async Task OnGetAsync(CancellationToken ct)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        _expenseService.Remove(userId, Id);
-        // ExpenseList = _expenseService.GetAll();
+        var categories = await _expenseService.GetCategoriesAsync(ct);
+        CategorySelectList = new SelectList(categories, nameof(ExpenseCategory.Id), nameof(ExpenseCategory.Name));
+        Expenses = await _expenseService.GetAllAsync(userId, SearchTerm, CategoryId, ct);
+    }
+
+    public async Task<IActionResult> OnPostDeleteAsync(CancellationToken ct)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var removed = await _expenseService.RemoveAsync(userId, Id, ct);
+        if (!removed)
+        {
+            return NotFound();
+        }
         return RedirectToPage();
     }
 }

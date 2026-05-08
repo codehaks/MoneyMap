@@ -1,24 +1,16 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using MoneyMap.Application;
 
-namespace MoneyMap.Web.Pages
+namespace MoneyMap.Web.Pages;
+
+public class IndexModel : PageModel
 {
-    public class IndexModel : PageModel
+    public int DaysLeft { get; private set; }
+    public int NextYear { get; private set; }
+
+    public void OnGet()
     {
-        private readonly ICalendarService _calendarService;
-
-        public IndexModel(ICalendarService calendarService)
-        {
-            _calendarService = calendarService;
-        }
-
-        public int DaysLeft { get; set; }
-        public bool IsNewYear { get; set; }
-        public async Task OnGetAsync()
-        {
-            IsNewYear = await _calendarService.IsNewYearAsync();
-            DaysLeft = await _calendarService.DaysLeftInYearAsync();
-        }
+        var nowUtc = DateTime.UtcNow;
+        NextYear = nowUtc.Year + 1;
+        DaysLeft = (new DateTime(NextYear, 1, 1, 0, 0, 0, DateTimeKind.Utc) - nowUtc).Days;
     }
 }

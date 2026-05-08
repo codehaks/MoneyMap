@@ -10,7 +10,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\" />
+    <Compile Remove="wwwroot\bootstrap-5.3.7-examples\**" />
+    <Content Remove="wwwroot\bootstrap-5.3.7-examples\**" />
+    <EmbeddedResource Remove="wwwroot\bootstrap-5.3.7-examples\**" />
+    <None Remove="wwwroot\bootstrap-5.3.7-examples\**" />
   </ItemGroup>
 
   <ItemGroup>
