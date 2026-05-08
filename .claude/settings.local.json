@@ -3,7 +3,9 @@
     "allow": [
       "Bash(dotnet --version)",
       "Bash(dotnet ef *)",
-      "Bash(dotnet build *)"
+      "Bash(dotnet build *)",
+      "Bash(dotnet sln *)",
+      "Bash(dotnet test *)"
     ]
   }
 }
