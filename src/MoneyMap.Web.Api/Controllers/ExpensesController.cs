@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MoneyMap.Application;
+using MoneyMap.Core;
 using MoneyMap.Core.DataModels;
 using MoneyMap.Web.Api.Models;
 using System.ComponentModel.DataAnnotations;
@@ -8,9 +9,6 @@ using System.Security.Claims;
 
 namespace MoneyMap.Web.Api.Controllers;
 
-/// <summary>
-/// Controller for managing expenses
-/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
@@ -26,443 +24,201 @@ public class ExpensesController : ControllerBase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Gets the current user ID from the authorization context
-    /// </summary>
-    /// <returns>The user ID</returns>
-    private string GetCurrentUserId()
-    {
-        return User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
-            ?? User.FindFirst("sub")?.Value 
+    private string GetCurrentUserId() =>
+        User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            ?? User.FindFirst("sub")?.Value
             ?? throw new UnauthorizedAccessException("User ID not found in claims");
-    }
 
-    /// <summary>
-    /// Get all expenses for the current user with optional filtering and pagination
-    /// </summary>
-    /// <param name="searchTerm">Optional search term to filter by note</param>
-    /// <param name="categoryId">Optional category ID to filter by</param>
-    /// <param name="pageSize">Number of items per page (default: 50, max: 1000)</param>
-    /// <param name="pageNumber">Page number (default: 1)</param>
-    /// <param name="startDate">Optional start date filter</param>
-    /// <param name="endDate">Optional end date filter</param>
-    /// <returns>Paginated list of expenses</returns>
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponse<PagedResult<ExpenseDto>>), 200)]
     [ProducesResponseType(typeof(ApiResponse<object>), 400)]
-    [ProducesResponseType(typeof(ApiResponse<object>), 500)]
-    public ActionResult<ApiResponse<PagedResult<ExpenseDto>>> GetExpenses(
+    public async Task<ActionResult<ApiResponse<PagedResult<ExpenseDto>>>> GetExpenses(
         [FromQuery] string? searchTerm = null,
         [FromQuery] int? categoryId = null,
         [FromQuery, Range(1, 1000)] int pageSize = 50,
         [FromQuery, Range(1, int.MaxValue)] int pageNumber = 1,
         [FromQuery] DateTime? startDate = null,
-        [FromQuery] DateTime? endDate = null)
+        [FromQuery] DateTime? endDate = null,
+        CancellationToken ct = default)
     {
         var userId = GetCurrentUserId();
-        try
+        _logger.LogInformation("Getting expenses for user {UserId} page {PageNumber} size {PageSize}", userId, pageNumber, pageSize);
+
+        var allExpenses = await _expenseService.GetAllAsync(userId, searchTerm, categoryId, ct);
+
+        IEnumerable<Expense> filtered = allExpenses;
+        if (startDate.HasValue) filtered = filtered.Where(e => e.Date >= startDate.Value);
+        if (endDate.HasValue) filtered = filtered.Where(e => e.Date <= endDate.Value);
+
+        var materialized = filtered.ToList();
+        var totalCount = materialized.Count;
+        var page = materialized
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .Select(ToDto)
+            .ToList();
+
+        return Ok(new ApiResponse<PagedResult<ExpenseDto>>
         {
-          
-
-            _logger.LogInformation("Getting expenses for user {UserId} with filters: searchTerm={SearchTerm}, categoryId={CategoryId}, page={PageNumber}, pageSize={PageSize}", 
-                userId, searchTerm, categoryId, pageNumber, pageSize);
-
-            // Get all expenses (the service doesn't support pagination yet, so we'll do it here)
-            var allExpenses = _expenseService.GetAll(userId, searchTerm, categoryId);
-
-            // Apply date filtering if provided
-            if (startDate.HasValue)
+            Success = true,
+            Message = $"Retrieved {page.Count} expenses",
+            Data = new PagedResult<ExpenseDto>
             {
-                allExpenses = allExpenses.Where(e => e.Date >= startDate.Value).ToList();
-            }
-            if (endDate.HasValue)
-            {
-                allExpenses = allExpenses.Where(e => e.Date <= endDate.Value).ToList();
-            }
-
-            // Apply pagination
-            var totalCount = allExpenses.Count;
-            var expenses = allExpenses
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
-
-            var expenseDtos = expenses.Select(e => new ExpenseDto
-            {
-                Id = e.Id,
-                Amount = e.Amount,
-                Date = e.Date,
-                Note = e.Note ?? string.Empty,
-                CategoryId = e.CategoryId,
-                CategoryName = e.Category?.Name ?? "Unknown",
-                UserId = e.UserId,
-                UserName = e.UserName ?? string.Empty
-            }).ToList();
-
-            var pagedResult = new PagedResult<ExpenseDto>
-            {
-                Items = expenseDtos,
+                Items = page,
                 TotalCount = totalCount,
                 PageNumber = pageNumber,
-                PageSize = pageSize
-            };
-
-            return Ok(new ApiResponse<PagedResult<ExpenseDto>>
-            {
-                Success = true,
-                Message = $"Retrieved {expenseDtos.Count} expenses",
-                Data = pagedResult
-            });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving expenses for user {UserId}", userId);
-            return StatusCode(500, new ApiResponse<object>
-            {
-                Success = false,
-                Message = "An error occurred while retrieving expenses",
-                Errors = new List<string> { ex.Message }
-            });
-        }
+                PageSize = pageSize,
+            },
+        });
     }
 
-    /// <summary>
-    /// Get a specific expense by ID for the current user
-    /// </summary>
-    /// <param name="id">The expense ID</param>
-    /// <returns>The expense if found</returns>
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(ApiResponse<ExpenseDto>), 200)]
-    [ProducesResponseType(typeof(ApiResponse<object>), 400)]
     [ProducesResponseType(typeof(ApiResponse<object>), 404)]
-    [ProducesResponseType(typeof(ApiResponse<object>), 500)]
-    public ActionResult<ApiResponse<ExpenseDto>> GetExpense(int id)
+    public async Task<ActionResult<ApiResponse<ExpenseDto>>> GetExpense(int id, CancellationToken ct)
     {
         var userId = GetCurrentUserId();
-        try
+        var expense = await _expenseService.FindByIdAsync(userId, id, ct);
+        if (expense is null)
         {
-
-
-            _logger.LogInformation("Getting expense {ExpenseId} for user {UserId}", id, userId);
-
-            var expense = _expenseService.FindById(userId, id);
-            if (expense == null)
-            {
-                return NotFound(new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = $"Expense with ID {id} not found for user {userId}",
-                    Errors = new List<string> { "Expense not found or does not belong to the specified user" }
-                });
-            }
-
-            var expenseDto = new ExpenseDto
-            {
-                Id = expense.Id,
-                Amount = expense.Amount,
-                Date = expense.Date,
-                Note = expense.Note ?? string.Empty,
-                CategoryId = expense.CategoryId,
-                CategoryName = expense.Category?.Name ?? "Unknown",
-                UserId = expense.UserId,
-                UserName = expense.UserName ?? string.Empty
-            };
-
-            return Ok(new ApiResponse<ExpenseDto>
-            {
-                Success = true,
-                Message = "Expense retrieved successfully",
-                Data = expenseDto
-            });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving expense {ExpenseId} for user {UserId}", id, userId);
-            return StatusCode(500, new ApiResponse<object>
+            return NotFound(new ApiResponse<object>
             {
                 Success = false,
-                Message = "An error occurred while retrieving the expense",
-                Errors = new List<string> { ex.Message }
+                Message = $"Expense with ID {id} not found.",
             });
         }
+
+        return Ok(new ApiResponse<ExpenseDto>
+        {
+            Success = true,
+            Message = "Expense retrieved successfully",
+            Data = ToDto(expense),
+        });
     }
 
-    /// <summary>
-    /// Create a new expense
-    /// </summary>
-    /// <param name="createExpenseDto">The expense data</param>
-    /// <returns>The created expense</returns>
     [HttpPost]
     [ProducesResponseType(typeof(ApiResponse<ExpenseDto>), 201)]
     [ProducesResponseType(typeof(ApiResponse<object>), 400)]
-    [ProducesResponseType(typeof(ApiResponse<object>), 500)]
-    public ActionResult<ApiResponse<ExpenseDto>> CreateExpense([FromBody] CreateExpenseDto createExpenseDto)
+    public async Task<ActionResult<ApiResponse<ExpenseDto>>> CreateExpense([FromBody] CreateExpenseDto dto, CancellationToken ct)
     {
+        if (!ModelState.IsValid) return ValidationProblem(ModelState);
+
+        var userId = GetCurrentUserId();
         try
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-
-                return BadRequest(new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = "Validation failed",
-                    Errors = errors
-                });
-            }
-
-            var userId = GetCurrentUserId();
-
-            _logger.LogInformation("Creating expense for user {UserId} with amount {Amount}", userId, createExpenseDto.Amount);
-
-            var expense = new Expense
-            {
-                Amount = createExpenseDto.Amount,
-                Date = createExpenseDto.Date,
-                Note = createExpenseDto.Note,
-                CategoryId = createExpenseDto.CategoryId,
-                UserId = userId,
-                UserName = createExpenseDto.UserName
-            };
-
-            _expenseService.Create(userId, expense);
-
-            // Retrieve the created expense to get the ID and category info
-            var createdExpense = _expenseService.FindById(userId, expense.Id);
-            if (createdExpense == null)
-            {
-                return StatusCode(500, new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = "Error retrieving created expense",
-                    Errors = new List<string> { "The expense was created but could not be retrieved" }
-                });
-            }
-
-            var expenseDto = new ExpenseDto
-            {
-                Id = createdExpense.Id,
-                Amount = createdExpense.Amount,
-                Date = createdExpense.Date,
-                Note = createdExpense.Note ?? string.Empty,
-                CategoryId = createdExpense.CategoryId,
-                CategoryName = createdExpense.Category?.Name ?? "Unknown",
-                UserId = createdExpense.UserId,
-                UserName = createdExpense.UserName ?? string.Empty
-            };
-
-            return CreatedAtAction(nameof(GetExpense), 
-                new { id = expense.Id, userId = expense.UserId }, 
-                new ApiResponse<ExpenseDto>
-                {
-                    Success = true,
-                    Message = "Expense created successfully",
-                    Data = expenseDto
-                });
+            await _expenseService.CreateAsync(userId, dto.Amount, dto.Date.ToUniversalTime(), dto.CategoryId, dto.Note, ct);
         }
-        catch (Exception ex)
+        catch (DomainException ex)
         {
-            var userId = GetCurrentUserId();
-            _logger.LogError(ex, "Error creating expense for user {UserId}", userId);
+            return BadRequest(new ApiResponse<object>
+            {
+                Success = false,
+                Message = ex.Message,
+                Errors = new List<string> { ex.Message },
+            });
+        }
+
+        var created = (await _expenseService.GetAllAsync(userId, null, dto.CategoryId, ct))
+            .OrderByDescending(e => e.Id)
+            .FirstOrDefault();
+
+        if (created is null)
+        {
             return StatusCode(500, new ApiResponse<object>
             {
                 Success = false,
-                Message = "An error occurred while creating the expense",
-                Errors = new List<string> { ex.Message }
+                Message = "Expense was created but could not be retrieved.",
             });
         }
+
+        return CreatedAtAction(nameof(GetExpense), new { id = created.Id }, new ApiResponse<ExpenseDto>
+        {
+            Success = true,
+            Message = "Expense created successfully",
+            Data = ToDto(created),
+        });
     }
 
-    /// <summary>
-    /// Update an existing expense
-    /// </summary>
-    /// <param name="id">The expense ID</param>
-    /// <param name="updateExpenseDto">The updated expense data</param>
-    /// <returns>The updated expense</returns>
     [HttpPut("{id}")]
     [ProducesResponseType(typeof(ApiResponse<ExpenseDto>), 200)]
     [ProducesResponseType(typeof(ApiResponse<object>), 400)]
     [ProducesResponseType(typeof(ApiResponse<object>), 404)]
-    [ProducesResponseType(typeof(ApiResponse<object>), 500)]
-    public ActionResult<ApiResponse<ExpenseDto>> UpdateExpense(int id, [FromBody] UpdateExpenseDto updateExpenseDto)
+    public async Task<ActionResult<ApiResponse<ExpenseDto>>> UpdateExpense(int id, [FromBody] UpdateExpenseDto dto, CancellationToken ct)
     {
+        if (!ModelState.IsValid) return ValidationProblem(ModelState);
+
+        var userId = GetCurrentUserId();
         try
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-
-                return BadRequest(new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = "Validation failed",
-                    Errors = errors
-                });
-            }
-
-            var userId = GetCurrentUserId();
-
-            _logger.LogInformation("Updating expense {ExpenseId} for user {UserId}", id, userId);
-
-            // Check if expense exists
-            var existingExpense = _expenseService.FindById(userId, id);
-            if (existingExpense == null)
+            var updated = await _expenseService.UpdateAsync(userId, id, dto.Amount, dto.Date.ToUniversalTime(), dto.CategoryId, dto.Note, ct);
+            if (!updated)
             {
                 return NotFound(new ApiResponse<object>
                 {
                     Success = false,
-                    Message = $"Expense with ID {id} not found for user {userId}",
-                    Errors = new List<string> { "Expense not found or does not belong to the specified user" }
+                    Message = $"Expense with ID {id} not found.",
                 });
             }
-
-            var expense = new Expense
-            {
-                Id = id,
-                Amount = updateExpenseDto.Amount,
-                Date = updateExpenseDto.Date,
-                Note = updateExpenseDto.Note,
-                CategoryId = updateExpenseDto.CategoryId,
-                UserId = userId,
-                UserName = existingExpense.UserName // Keep existing username
-            };
-
-            _expenseService.Update(userId, expense);
-
-            // Retrieve the updated expense
-            var updatedExpense = _expenseService.FindById(userId, id);
-            if (updatedExpense == null)
-            {
-                return StatusCode(500, new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = "Error retrieving updated expense",
-                    Errors = new List<string> { "The expense was updated but could not be retrieved" }
-                });
-            }
-
-            var expenseDto = new ExpenseDto
-            {
-                Id = updatedExpense.Id,
-                Amount = updatedExpense.Amount,
-                Date = updatedExpense.Date,
-                Note = updatedExpense.Note ?? string.Empty,
-                CategoryId = updatedExpense.CategoryId,
-                CategoryName = updatedExpense.Category?.Name ?? "Unknown",
-                UserId = updatedExpense.UserId,
-                UserName = updatedExpense.UserName ?? string.Empty
-            };
-
-            return Ok(new ApiResponse<ExpenseDto>
-            {
-                Success = true,
-                Message = "Expense updated successfully",
-                Data = expenseDto
-            });
         }
-        catch (Exception ex)
+        catch (DomainException ex)
         {
-            var userId = GetCurrentUserId();
-            _logger.LogError(ex, "Error updating expense {ExpenseId} for user {UserId}", id, userId);
-            return StatusCode(500, new ApiResponse<object>
+            return BadRequest(new ApiResponse<object>
             {
                 Success = false,
-                Message = "An error occurred while updating the expense",
-                Errors = new List<string> { ex.Message }
+                Message = ex.Message,
+                Errors = new List<string> { ex.Message },
             });
         }
+
+        var fresh = await _expenseService.FindByIdAsync(userId, id, ct);
+        return Ok(new ApiResponse<ExpenseDto>
+        {
+            Success = true,
+            Message = "Expense updated successfully",
+            Data = fresh is null ? null : ToDto(fresh),
+        });
     }
 
-    /// <summary>
-    /// Delete an expense for the current user
-    /// </summary>
-    /// <param name="id">The expense ID</param>
-    /// <returns>Success response</returns>
     [HttpDelete("{id}")]
-    [ProducesResponseType(typeof(ApiResponse<object>), 204)]
-    [ProducesResponseType(typeof(ApiResponse<object>), 400)]
+    [ProducesResponseType(204)]
     [ProducesResponseType(typeof(ApiResponse<object>), 404)]
-    [ProducesResponseType(typeof(ApiResponse<object>), 500)]
-    public ActionResult<ApiResponse<object>> DeleteExpense(int id)
+    public async Task<IActionResult> DeleteExpense(int id, CancellationToken ct)
     {
-        try
+        var userId = GetCurrentUserId();
+        var removed = await _expenseService.RemoveAsync(userId, id, ct);
+        if (!removed)
         {
-            var userId = GetCurrentUserId();
-
-            _logger.LogInformation("Deleting expense {ExpenseId} for user {UserId}", id, userId);
-
-            // Check if expense exists
-            var expense = _expenseService.FindById(userId, id);
-            if (expense == null)
-            {
-                return NotFound(new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = $"Expense with ID {id} not found for user {userId}",
-                    Errors = new List<string> { "Expense not found or does not belong to the specified user" }
-                });
-            }
-
-            _expenseService.Remove(userId, id);
-
-            return NoContent();
-        }
-        catch (Exception ex)
-        {
-            var userId = GetCurrentUserId();
-            _logger.LogError(ex, "Error deleting expense {ExpenseId} for user {UserId}", id, userId);
-            return StatusCode(500, new ApiResponse<object>
+            return NotFound(new ApiResponse<object>
             {
                 Success = false,
-                Message = "An error occurred while deleting the expense",
-                Errors = new List<string> { ex.Message }
+                Message = $"Expense with ID {id} not found.",
             });
         }
+        return NoContent();
     }
 
-    /// <summary>
-    /// Get all expense categories
-    /// </summary>
-    /// <returns>List of expense categories</returns>
     [HttpGet("categories")]
     [ProducesResponseType(typeof(ApiResponse<List<ExpenseCategoryDto>>), 200)]
-    [ProducesResponseType(typeof(ApiResponse<object>), 500)]
-    public ActionResult<ApiResponse<List<ExpenseCategoryDto>>> GetCategories()
+    public async Task<ActionResult<ApiResponse<List<ExpenseCategoryDto>>>> GetCategories(CancellationToken ct)
     {
-        try
+        var categories = await _expenseService.GetCategoriesAsync(ct);
+        var dtos = categories.Select(c => new ExpenseCategoryDto { Id = c.Id, Name = c.Name }).ToList();
+        return Ok(new ApiResponse<List<ExpenseCategoryDto>>
         {
-            _logger.LogInformation("Getting all expense categories");
-
-            var categories = _expenseService.GetCategories();
-            var categoryDtos = categories.Select(c => new ExpenseCategoryDto
-            {
-                Id = c.Id,
-                Name = c.Name
-            }).ToList();
-
-            return Ok(new ApiResponse<List<ExpenseCategoryDto>>
-            {
-                Success = true,
-                Message = $"Retrieved {categoryDtos.Count} categories",
-                Data = categoryDtos
-            });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving expense categories");
-            return StatusCode(500, new ApiResponse<object>
-            {
-                Success = false,
-                Message = "An error occurred while retrieving categories",
-                Errors = new List<string> { ex.Message }
-            });
-        }
+            Success = true,
+            Message = $"Retrieved {dtos.Count} categories",
+            Data = dtos,
+        });
     }
+
+    private static ExpenseDto ToDto(Expense e) => new()
+    {
+        Id = e.Id,
+        Amount = e.Amount,
+        Date = e.Date,
+        Note = e.Note,
+        CategoryId = e.CategoryId,
+        CategoryName = e.Category?.Name ?? string.Empty,
+        UserId = e.UserId,
+    };
 }
