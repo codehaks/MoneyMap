@@ -41,6 +41,17 @@
   --bs-border-radius-sm: var(--mm-radius-sm);
   --bs-link-color: var(--mm-accent);
   --bs-link-hover-color: var(--mm-ink);
+  --bs-primary: var(--mm-accent);
+  --bs-primary-rgb: 47, 74, 63;
+
+  /* re-map legacy custom.css tokens so existing rules pick up the new palette */
+  --primary-color:   var(--mm-accent);
+  --secondary-color: var(--mm-ink);
+  --accent-color:    var(--mm-accent);
+  --light-bg:        var(--mm-bg);
+  --dark-text:       var(--mm-ink);
+  --light-text:      var(--mm-surface);
+  --gray-text:       var(--mm-ink-soft);
 }
 
 /* =========================================================================
@@ -89,7 +100,8 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
 }
 .btn:hover { transform: none; }   /* override the older custom.css translateY hover */
 
-.btn-primary {
+.btn-primary,
+.btn.btn-primary {
   --bs-btn-bg: var(--mm-accent);
   --bs-btn-border-color: var(--mm-accent);
   --bs-btn-hover-bg: var(--mm-ink);
@@ -98,9 +110,40 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
   --bs-btn-active-border-color: var(--mm-ink);
   --bs-btn-disabled-bg: var(--mm-accent);
   --bs-btn-disabled-border-color: var(--mm-accent);
+  background: var(--mm-accent);
+  background-color: var(--mm-accent);
+  border-color: var(--mm-accent);
+  color: #fff;
   border-radius: var(--mm-radius-sm);
   padding: .5rem 1rem;
   letter-spacing: 0;
+}
+.btn-primary:hover, .btn.btn-primary:hover,
+.btn-primary:focus, .btn.btn-primary:focus,
+.btn-primary:active, .btn.btn-primary:active {
+  background: var(--mm-ink);
+  background-color: var(--mm-ink);
+  border-color: var(--mm-ink);
+  color: #fff;
+}
+
+/* Nav pills used by Identity Manage area */
+.nav-pills {
+  --bs-nav-pills-link-active-bg: var(--mm-accent);
+  --bs-nav-pills-link-active-color: #fff;
+  --bs-nav-link-color: var(--mm-ink-soft);
+  --bs-nav-link-hover-color: var(--mm-ink);
+}
+.nav-pills .nav-link {
+  border-radius: var(--mm-radius-sm);
+  padding: .55rem .85rem;
+  font-weight: 500;
+}
+.nav-pills .nav-link:hover { background: var(--mm-surface-alt); }
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
+  background: var(--mm-accent);
+  color: #fff;
 }
 .btn-outline-primary {
   --bs-btn-color: var(--mm-accent);
@@ -560,6 +603,58 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .mm-tx__amount[data-flow="out"] { color: var(--mm-ink); }
 .mm-tx__amount[data-flow="out"]::before { content: "−"; margin-right: 1px; }
 .mm-tx__amount[data-flow="in"]::before  { content: "+"; margin-right: 1px; }
+
+/* =========================================================================
+   Sub-navigation — used inside mm-content for areas like Manage Account
+   that need their own secondary navigation alongside the workspace sidebar.
+   ========================================================================= */
+.mm-subgrid {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 1.75rem;
+  align-items: start;
+}
+.mm-subnav {
+  background: var(--mm-surface);
+  border: 1px solid var(--mm-line);
+  border-radius: var(--mm-radius);
+  padding: .5rem;
+  position: sticky;
+  top: 5rem;
+  box-shadow: var(--mm-shadow-1);
+}
+.mm-subnav .nav { gap: 2px; }
+.mm-subnav .nav-link {
+  color: var(--mm-ink-soft);
+  font-weight: 500;
+  font-size: .9rem;
+  border-radius: var(--mm-radius-sm);
+  padding: .55rem .75rem;
+}
+.mm-subnav .nav-link:hover { background: var(--mm-surface-alt); color: var(--mm-ink); }
+.mm-subnav .nav-link.active {
+  background: var(--mm-accent-soft);
+  color: var(--mm-ink);
+}
+.mm-subcontent {
+  background: var(--mm-surface);
+  border: 1px solid var(--mm-line);
+  border-radius: var(--mm-radius);
+  padding: 1.5rem 1.75rem;
+  box-shadow: var(--mm-shadow-1);
+  min-width: 0;
+}
+.mm-subcontent h3 {
+  font-family: var(--mm-font-display);
+  font-weight: 600;
+  letter-spacing: -.01em;
+  margin-top: 0;
+  margin-bottom: 1.25rem;
+}
+@media (max-width: 768px) {
+  .mm-subgrid { grid-template-columns: 1fr; }
+  .mm-subnav { position: static; }
+}
 
 /* Categories side card */
 .mm-cat-row {
