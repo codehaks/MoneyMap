@@ -1,8 +1,46 @@
-﻿@page
+@page
 @model MoneyMap.Web.Areas.Admin.Pages.IndexModel
 @{
+    ViewBag.Title = "Admin";
 }
 
-<h1>
-    Admin Panel
-</h1>
+<header class="mm-page-head">
+    <div>
+        <span class="mm-eyebrow">Administration</span>
+        <h1>Admin overview</h1>
+        <p>Manage users, categories, and system-wide settings.</p>
+    </div>
+</header>
+
+<section class="row g-3 mb-4">
+    <div class="col-12 col-sm-6 col-xl-4">
+        <a class="card mm-stat text-decoration-none" asp-area="Admin" asp-page="/Users/Index">
+            <div class="mm-stat__head">
+                <span class="mm-stat__label">Users</span>
+                <span class="mm-stat__icon"><i class="fas fa-users"></i></span>
+            </div>
+            <div class="mm-stat__value">Manage</div>
+            <div class="mm-stat__delta">View and edit user accounts</div>
+        </a>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-4">
+        <a class="card mm-stat text-decoration-none" asp-area="Admin" asp-page="/Categories/Index">
+            <div class="mm-stat__head">
+                <span class="mm-stat__label">Categories</span>
+                <span class="mm-stat__icon"><i class="fas fa-tags"></i></span>
+            </div>
+            <div class="mm-stat__value">Manage</div>
+            <div class="mm-stat__delta">Edit expense categories</div>
+        </a>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-4">
+        <div class="card mm-stat">
+            <div class="mm-stat__head">
+                <span class="mm-stat__label">Reports</span>
+                <span class="mm-stat__icon"><i class="fas fa-chart-line"></i></span>
+            </div>
+            <div class="mm-stat__value">Coming soon</div>
+            <div class="mm-stat__delta">System-wide insights</div>
+        </div>
+    </div>
+</section>

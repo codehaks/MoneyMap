@@ -5,8 +5,11 @@
 
 @{
     var page = ViewContext.RouteData.Values["page"]?.ToString() ?? string.Empty;
+    var area = ViewContext.RouteData.Values["area"]?.ToString() ?? string.Empty;
     bool IsActive(string match) => page.Equals(match, StringComparison.OrdinalIgnoreCase);
     bool IsArea(string prefix) => page.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
+    bool InArea(string a) => string.Equals(area, a, StringComparison.OrdinalIgnoreCase);
+    var isAdmin = User.IsInRole("admin");
     var userName = SignInManager.IsSignedIn(User) ? UserManager.GetUserName(User) : null;
     var initials = !string.IsNullOrEmpty(userName)
         ? string.Concat(userName.Split(new[] { ' ', '.', '@' }, StringSplitOptions.RemoveEmptyEntries)
@@ -35,6 +38,10 @@
         <a class="mm-brand" asp-area="Users" asp-page="/Index">
             <span class="mm-brand-mark">M</span>
             <span>MoneyMap</span>
+            @if (InArea("Admin"))
+            {
+                <span class="mm-chip">Admin</span>
+            }
         </a>
 
         <nav aria-label="Primary">
@@ -43,21 +50,38 @@
                     <span class="mm-nav-section">Workspace</span>
                 </li>
                 <li>
-                    <a asp-area="Users" asp-page="/Index" class="@(IsActive("/Index") ? "is-active" : "")">
+                    <a asp-area="Users" asp-page="/Index" class="@(InArea("Users") && IsActive("/Index") ? "is-active" : "")">
                         <i class="fas fa-chart-line"></i> Dashboard
                     </a>
                 </li>
                 <li>
-                    <a asp-area="Users" asp-page="/Expenses/Index" class="@(IsArea("/Expenses") ? "is-active" : "")">
+                    <a asp-area="Users" asp-page="/Expenses/Index" class="@(InArea("Users") && IsArea("/Expenses") ? "is-active" : "")">
                         <i class="fas fa-receipt"></i> Expenses
                     </a>
                 </li>
                 <li>
-                    <a href="#"><i class="fas fa-tags"></i> Categories</a>
-                </li>
-                <li>
                     <a href="#"><i class="fas fa-chart-pie"></i> Reports</a>
                 </li>
+
+                @if (isAdmin)
+                {
+                    <li><span class="mm-nav-section">Admin</span></li>
+                    <li>
+                        <a asp-area="Admin" asp-page="/Index" class="@(InArea("Admin") && IsActive("/Index") ? "is-active" : "")">
+                            <i class="fas fa-gauge"></i> Overview
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-area="Admin" asp-page="/Users/Index" class="@(InArea("Admin") && IsArea("/Users") ? "is-active" : "")">
+                            <i class="fas fa-users"></i> Users
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-area="Admin" asp-page="/Categories/Index" class="@(InArea("Admin") && IsArea("/Categories") ? "is-active" : "")">
+                            <i class="fas fa-tags"></i> Categories
+                        </a>
+                    </li>
+                }
 
                 <li><span class="mm-nav-section">Account</span></li>
                 <li>

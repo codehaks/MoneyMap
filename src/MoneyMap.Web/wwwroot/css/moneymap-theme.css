@@ -323,6 +323,20 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
   font-family: var(--mm-font-display);
   font-size: .9rem;
 }
+.mm-chip {
+  display: inline-flex; align-items: center;
+  font-family: var(--mm-font-sans);
+  font-size: .65rem;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: .15rem .45rem;
+  border-radius: 999px;
+  background: var(--mm-accent-soft);
+  color: var(--mm-accent);
+  border: 1px solid color-mix(in srgb, var(--mm-accent) 20%, transparent);
+  margin-left: .15rem;
+}
 .mm-nav { display: flex; flex-direction: column; gap: 2px; padding: 0; margin: 0; list-style: none; }
 .mm-nav a, .mm-nav button {
   display: flex; align-items: center; gap: .75rem;
