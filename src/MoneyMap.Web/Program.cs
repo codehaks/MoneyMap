@@ -30,7 +30,7 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddRazorPages().AddRazorPagesOptions(options =>
 {
     options.Conventions.AuthorizeAreaFolder("users", "/");
-    options.Conventions.AuthorizeAreaFolder("admin", "/", AuthorizationPolicies.RequireAdmin);
+    //options.Conventions.AuthorizeAreaFolder("admin", "/", AuthorizationPolicies.RequireAdmin);
 });
 
 builder.Services.AddTransient<IExpenseService, ExpenseService>();
