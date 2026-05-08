@@ -46,41 +46,56 @@
 
         <nav aria-label="Primary">
             <ul class="mm-nav">
-                <li>
-                    <span class="mm-nav-section">Workspace</span>
-                </li>
-                <li>
-                    <a asp-area="Users" asp-page="/Index" class="@(InArea("Users") && IsActive("/Index") ? "is-active" : "")">
-                        <i class="fas fa-chart-line"></i> Dashboard
-                    </a>
-                </li>
-                <li>
-                    <a asp-area="Users" asp-page="/Expenses/Index" class="@(InArea("Users") && IsArea("/Expenses") ? "is-active" : "")">
-                        <i class="fas fa-receipt"></i> Expenses
-                    </a>
-                </li>
-                <li>
-                    <a href="#"><i class="fas fa-chart-pie"></i> Reports</a>
-                </li>
-
-                @if (isAdmin)
+                @if (InArea("Admin"))
                 {
-                    <li><span class="mm-nav-section">Admin</span></li>
+                    <li><span class="mm-nav-section">Administration</span></li>
                     <li>
-                        <a asp-area="Admin" asp-page="/Index" class="@(InArea("Admin") && IsActive("/Index") ? "is-active" : "")">
+                        <a asp-area="Admin" asp-page="/Index" class="@(IsActive("/Index") ? "is-active" : "")">
                             <i class="fas fa-gauge"></i> Overview
                         </a>
                     </li>
                     <li>
-                        <a asp-area="Admin" asp-page="/Users/Index" class="@(InArea("Admin") && IsArea("/Users") ? "is-active" : "")">
+                        <a asp-area="Admin" asp-page="/Users/Index" class="@(IsArea("/Users") ? "is-active" : "")">
                             <i class="fas fa-users"></i> Users
                         </a>
                     </li>
                     <li>
-                        <a asp-area="Admin" asp-page="/Categories/Index" class="@(InArea("Admin") && IsArea("/Categories") ? "is-active" : "")">
+                        <a asp-area="Admin" asp-page="/Categories/Index" class="@(IsArea("/Categories") ? "is-active" : "")">
                             <i class="fas fa-tags"></i> Categories
                         </a>
                     </li>
+                    <li>
+                        <a asp-area="Users" asp-page="/Index">
+                            <i class="fas fa-arrow-left"></i> Exit admin
+                        </a>
+                    </li>
+                }
+                else
+                {
+                    <li><span class="mm-nav-section">Workspace</span></li>
+                    <li>
+                        <a asp-area="Users" asp-page="/Index" class="@(InArea("Users") && IsActive("/Index") ? "is-active" : "")">
+                            <i class="fas fa-chart-line"></i> Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-area="Users" asp-page="/Expenses/Index" class="@(InArea("Users") && IsArea("/Expenses") ? "is-active" : "")">
+                            <i class="fas fa-receipt"></i> Expenses
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fas fa-chart-pie"></i> Reports</a>
+                    </li>
+
+                    @if (isAdmin)
+                    {
+                        <li><span class="mm-nav-section">Admin</span></li>
+                        <li>
+                            <a asp-area="Admin" asp-page="/Index">
+                                <i class="fas fa-shield-halved"></i> Open admin panel
+                            </a>
+                        </li>
+                    }
                 }
 
                 <li><span class="mm-nav-section">Account</span></li>
